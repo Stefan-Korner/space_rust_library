@@ -15,6 +15,22 @@
 use std::ops;
 use util::exception;
 
+///////////////
+// constants //
+///////////////
+
+// index = [first_bit_in_byte_pos][last_bit_in_byte_pos]
+const BIT_FILTER: [[u8; 8]; 8] = [
+    [0x7F, 0x3F, 0x1F, 0x0F, 0x07, 0x03, 0x01, 0x00],
+    [   0, 0xBF, 0x9F, 0x8F, 0x87, 0x83, 0x81, 0x80],
+    [   0,    0, 0xDF, 0xCF, 0xC7, 0xC3, 0xC1, 0xC0],
+    [   0,    0,    0, 0xEF, 0xE7, 0xE3, 0xE1, 0xE0],
+    [   0,    0,    0,    0, 0xF7, 0xF3, 0xF1, 0xF0],
+    [   0,    0,    0,    0,    0, 0xFB, 0xF9, 0xF8],
+    [   0,    0,    0,    0,    0,    0, 0xFD, 0xFC],
+    [   0,    0,    0,    0,    0,    0,    0, 0xFE]
+];
+
 ///////////////////////////////////
 // accessors for different types //
 ///////////////////////////////////
@@ -166,12 +182,89 @@ pub trait DUintf {
     }
 
     // bit aligned access
-    fn get_bits(&self, _bit_pos: usize, _bit_length: usize) ->
+    fn get_bits(&self, bit_pos: usize, bit_length: usize) ->
         Result<u32, exception::Exception> {
-        Ok(1)
+        // performance optimizations:
+        // - divide by 8 is replaced by >> 3 (performance)
+        // - modulo 8 is replaced by & 7 (performance)
+        // consistency checks
+        if (bit_length == 0) || (bit_length > 32) {
+            return Err(exception::raise("invalid bit_length"));
+        }
+        let last_bit_pos = bit_pos + bit_length - 1;
+        let last_byte_pos = last_bit_pos >> 3;
+        if last_byte_pos >= self.size() {
+            return Err(exception::raise("bit_pos/bit_length out of buffer"));
+        }
+        // accumulate the number starting with the first byte
+        let mut byte_pos = bit_pos >> 3;
+        let byte = self.buffer_read_only()[byte_pos];
+        // first byte: filter the highest bits that do not belong to the value
+        let first_bit_in_byte_pos = bit_pos & 7;
+        let bit_filter = (1_u8 << (8 - first_bit_in_byte_pos)) - 1;
+        let mut value = (byte & bit_filter) as u32;
+        // next bytes...
+        byte_pos += 1;
+        while byte_pos <= last_byte_pos {
+            let byte = self.buffer_read_only()[byte_pos];
+            value = (value << 8) + (byte as u32);
+            byte_pos += 1;
+        }
+        // last byte: remove the lowest bits that do not belong to the value
+        let last_bit_in_byte_pos = last_bit_pos & 7;
+        value >>= 7 - last_bit_in_byte_pos;
+        Ok(value)
     }
-    fn set_bits(&mut self, _bit_pos: usize, _bit_length: usize, _value: u32) ->
+    fn set_bits(&mut self, bit_pos: usize, bit_length: usize, value: u32) ->
         Result<(), exception::Exception> {
+        // performance optimizations:
+        // - divide by 8 is replaced by >> 3 (performance)
+        // - modulo 8 is replaced by & 7 (performance)
+        // consistency checks
+        if (bit_length == 0) || (bit_length > 32) {
+            return Err(exception::raise("invalid bit_length"));
+        }
+        let max_value = (1_u64 << bit_length) - 1;
+        if (value as u64) > max_value {
+            return Err(exception::raise("value out of range"));
+        }
+        let last_bit_pos = bit_pos + bit_length - 1;
+        let last_byte_pos = last_bit_pos >> 3;
+        if last_byte_pos >= self.size() {
+            return Err(exception::raise("bit_pos/bit_length out of buffer"));
+        }
+        // set zero-bits in the buffer where the value aligns
+        let first_byte_pos = bit_pos >> 3;
+        let first_bit_in_byte_pos = bit_pos & 7;
+        let last_bit_in_byte_pos = last_bit_pos & 7;
+        let mut byte_pos = first_byte_pos;
+        if first_byte_pos == last_byte_pos {
+            self.buffer_read_write()[byte_pos] &= BIT_FILTER[first_bit_in_byte_pos][last_bit_in_byte_pos];
+        }
+        else
+        {
+            self.buffer_read_write()[byte_pos] &= BIT_FILTER[first_bit_in_byte_pos][7];
+            byte_pos += 1;
+            while byte_pos < last_byte_pos {
+                self.buffer_read_write()[byte_pos] = 0;
+                byte_pos += 1;
+            }
+            self.buffer_read_write()[byte_pos] &= BIT_FILTER[0][last_bit_in_byte_pos];
+        }
+        // fill value with trailing zero-bits to align with the position
+        let mut aligned_value = value as u64;
+        aligned_value <<= 7 - last_bit_in_byte_pos;
+        // decompose the aligned_value and add it to the buffer
+        // starting at byte_pos, which is at the last byte
+        while byte_pos >= first_byte_pos {
+            let byte = (aligned_value & 0xFF) as u8;
+            self.buffer_read_write()[byte_pos] += byte;
+            aligned_value >>= 8;
+            if byte_pos == 0 {
+                break;
+            }
+            byte_pos -= 1;
+        }
         Ok(())
     }
     fn get_bits_acc(&self, acc: BitAccessor) ->

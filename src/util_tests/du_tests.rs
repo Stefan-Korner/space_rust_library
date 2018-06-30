@@ -29,6 +29,11 @@ def_big_unsigned_accessor!(BUINT_ACC6, 0, 6);
 def_big_unsigned_accessor!(BUINT_ACC7, 0, 7);
 def_big_unsigned_accessor!(BUINT_ACC8, 0, 8);
 
+def_bit_accessor!(BIT_ACC1,  4,  1);
+def_bit_accessor!(BIT_ACC2,  5,  3);
+def_bit_accessor!(BIT_ACC3, 12,  8);
+def_bit_accessor!(BIT_ACC4, 20, 16);
+
 pub fn test() {
     let txt1 = "0123456789 hihihi huhuhu";
     let mut du1 = du::DU::new_owner(String::from(txt1).into_bytes());
@@ -173,6 +178,55 @@ pub fn test() {
     du1.dump("du1");
     assert_eq!(du1.dump_str(), "
 0000 08 07 06 05 04 03 02 01 38 39 20 68 69 68 69 68 ........89 hihih
+0010 69 20 68 75 68 75 68 75 00 00 00 00 00 00 00 00 i huhuhu........
+0020 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................
+0030 00 00 00 00 00 00 00 00                         ........");
+
+    // temporary force a proper contents in the buffer
+    du1[0] = 0x04;
+    du1[1] = 0x03;
+    du1[2] = 0x02;
+    du1[3] = 0x01;
+    du1[4] = 0x34;
+
+    val = du1.get_bits_acc(BIT_ACC1).unwrap();
+    println!("val = {}", val);
+    assert_eq!(val, 0);
+    val = du1.get_bits_acc(BIT_ACC2).unwrap();
+    println!("val = {}", val);
+    assert_eq!(val, 4);
+    val = du1.get_bits_acc(BIT_ACC3).unwrap();
+    println!("val = {}", val);
+    assert_eq!(val, 48);
+    val = du1.get_bits_acc(BIT_ACC4).unwrap();
+    println!("val = {}", val);
+    assert_eq!(val, 8211);
+
+    du1.set_bits_acc(BIT_ACC1, 1).unwrap();
+    du1.dump("du1");
+    assert_eq!(du1.dump_str(), "
+0000 0c 03 02 01 34 03 02 01 38 39 20 68 69 68 69 68 ....4...89 hihih
+0010 69 20 68 75 68 75 68 75 00 00 00 00 00 00 00 00 i huhuhu........
+0020 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................
+0030 00 00 00 00 00 00 00 00                         ........");
+    du1.set_bits_acc(BIT_ACC2, 3).unwrap();
+    du1.dump("du1");
+    assert_eq!(du1.dump_str(), "
+0000 0b 03 02 01 34 03 02 01 38 39 20 68 69 68 69 68 ....4...89 hihih
+0010 69 20 68 75 68 75 68 75 00 00 00 00 00 00 00 00 i huhuhu........
+0020 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................
+0030 00 00 00 00 00 00 00 00                         ........");
+    du1.set_bits_acc(BIT_ACC3, 171).unwrap();
+    du1.dump("du1");
+    assert_eq!(du1.dump_str(), "
+0000 0b 0a b2 01 34 03 02 01 38 39 20 68 69 68 69 68 ....4...89 hihih
+0010 69 20 68 75 68 75 68 75 00 00 00 00 00 00 00 00 i huhuhu........
+0020 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................
+0030 00 00 00 00 00 00 00 00                         ........");
+    du1.set_bits_acc(BIT_ACC4, 39030).unwrap();
+    du1.dump("du1");
+    assert_eq!(du1.dump_str(), "
+0000 0b 0a b9 87 64 03 02 01 38 39 20 68 69 68 69 68 ....d...89 hihih
 0010 69 20 68 75 68 75 68 75 00 00 00 00 00 00 00 00 i huhuhu........
 0020 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................
 0030 00 00 00 00 00 00 00 00                         ........");
