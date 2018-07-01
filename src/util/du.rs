@@ -12,6 +12,7 @@
 //*****************************************************************************
 // Utilities - Data Unit                                                      *
 //*****************************************************************************
+use std::cmp;
 use std::ops;
 use util::exception;
 
@@ -274,6 +275,48 @@ pub trait DUintf {
     fn set_bits_acc(&mut self, acc: BitAccessor, value: u32) ->
         Result<(), exception::Exception> {
         self.set_bits(acc.bit_pos, acc.bit_length, value)
+    }
+
+    // byte aligned access
+    fn get_bytes(&self, byte_pos: usize, byte_length: usize) ->
+        Result<&[u8], exception::Exception> {
+        // consistency checks
+        if byte_length == 0 {
+            return Err(exception::raise("invalid byte_length"));
+        }
+        let end_pos = byte_pos + byte_length;
+        if end_pos > self.size() {
+            return Err(exception::raise("byte_pos/byte_length out of buffer"));
+        }
+        Ok(&self.buffer_read_only()[byte_pos..end_pos])
+    }
+    fn set_bytes(&mut self, byte_pos: usize, byte_length: usize, bytes: &[u8]) ->
+        Result<(), exception::Exception> {
+        // consistency checks
+        if byte_length == 0 {
+            return Err(exception::raise("invalid byte_length"));
+        }
+        if (byte_pos + byte_length) > self.size() {
+            return Err(exception::raise("byte_pos/byte_length out of buffer"));
+        }
+        // copy the minimum of bytes defined by byte_length and bytes
+        let num_bytes = cmp::min(byte_length, bytes.len());
+        let mut src_byte_pos = 0;
+        let mut dest_byte_pos = byte_pos;
+        while src_byte_pos < num_bytes {
+            self.buffer_read_write()[dest_byte_pos] = bytes[src_byte_pos];
+            src_byte_pos += 1;
+            dest_byte_pos += 1;
+        }
+        Ok(())
+    }
+    fn get_bytes_acc(&self, acc: ByteAccessor) ->
+        Result<&[u8], exception::Exception> {
+        self.get_bytes(acc.byte_pos, acc.byte_length)
+    }
+    fn set_bytes_acc(&mut self, acc: ByteAccessor, bytes: &[u8]) ->
+        Result<(), exception::Exception> {
+        self.set_bytes(acc.byte_pos, acc.byte_length, bytes)
     }
 
     // unsigned integer access
