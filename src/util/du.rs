@@ -85,9 +85,11 @@ macro_rules! def_big_unsigned_accessor {
 /////////////////////
 pub trait DUintf {
     // returns a read-only reference, must be implemented in struct
-    fn buffer_read_only(&self) -> &Vec<u8>;
+    fn buffer_read_only(&self) -> &[u8];
     // returns a read-write reference, must be implemented in struct 
-    fn buffer_read_write(&mut self) -> &mut Vec<u8>;
+    fn buffer_read_write(&mut self) -> &mut [u8];
+    // change size, must be implemented in struct
+    fn resize(&mut self, new_size: usize);
 
     ///////////////////////
     // general accessors //
@@ -96,23 +98,6 @@ pub trait DUintf {
     // returns the size
     fn size(&self) -> usize {
         self.buffer_read_only().len()
-    }
-    // change size
-    fn resize(&mut self, new_size: usize) {
-        let old_size = self.size();
-        if old_size < new_size {
-            let additional = new_size - old_size;
-            self.buffer_read_write().reserve(additional);
-            let mut i = 0;
-            while i < new_size {
-                self.buffer_read_write().push(0);
-                i = i + 1;
-            }
-        } else {
-            unsafe {
-                self.buffer_read_write().set_len(new_size);
-            }
-        }
     }
     // dumps the buffer to a string
     fn dump_str(&self) -> String {
@@ -451,8 +436,8 @@ pub trait DUintf {
 // Data Unit's internal vector that supports different type of ownerships
 enum HybridVector<'a> {
     Owner(Vec<u8>),
-    ReadWrite(&'a mut Vec<u8>),
-    ReadOnly(&'a Vec<u8>),
+    ReadWrite(&'a mut [u8]),
+    ReadOnly(&'a [u8]),
 }
 impl<'a> HybridVector<'a> {
     // default constructor
@@ -472,18 +457,18 @@ impl<'a> HybridVector<'a> {
         HybridVector::Owner(value)
     }
     // wraps data for read-only
-    fn new_read_only(reference: &Vec<u8>) -> HybridVector {
+    fn new_read_only(reference: &[u8]) -> HybridVector {
         HybridVector::ReadOnly(reference)
     }
     // wraps data for read-write
-    fn new_read_write(reference: &mut Vec<u8>) -> HybridVector {
+    fn new_read_write(reference: &mut [u8]) -> HybridVector {
         HybridVector::ReadWrite(reference)
     }
     // returns a read-only reference
-    fn read_only(&self) -> &Vec<u8> {
+    fn read_only(&self) -> &[u8] {
         match self {
             &HybridVector::Owner(ref read_write_ref) => {
-                read_write_ref
+                read_write_ref.as_slice()
             },
             &HybridVector::ReadWrite(ref read_write_ref) => {
                 read_write_ref
@@ -494,10 +479,10 @@ impl<'a> HybridVector<'a> {
         }
     }
     // returns a read-write reference
-    fn read_write(&mut self) -> &mut Vec<u8> {
+    fn read_write(&mut self) -> &mut [u8] {
         match self {
             &mut HybridVector::Owner(ref mut read_write_ref) => {
-                read_write_ref
+                read_write_ref.as_mut_slice()
             },
             &mut HybridVector::ReadWrite(ref mut read_write_ref) => {
                 read_write_ref
@@ -505,6 +490,34 @@ impl<'a> HybridVector<'a> {
             _ => {
                 panic!("must not happen");
             },
+        }
+    }
+    // returns a read-write reference
+    fn mut_vec(&mut self) -> &mut Vec<u8> {
+        match self {
+            &mut HybridVector::Owner(ref mut read_write_ref) => {
+                read_write_ref
+            },
+            _ => {
+                panic!("must not happen");
+            },
+        }
+    }
+    // change size
+    fn resize(&mut self, new_size: usize) {
+        let old_size = self.read_only().len();
+        if old_size < new_size {
+            let additional = new_size - old_size;
+            self.mut_vec().reserve(additional);
+            let mut i = 0;
+            while i < new_size {
+                self.mut_vec().push(0);
+                i = i + 1;
+            }
+        } else {
+            unsafe {
+                self.mut_vec().set_len(new_size);
+            }
         }
     }
 }
@@ -532,12 +545,16 @@ impl<'a> ops::IndexMut<usize> for DU<'a> {
 
 impl<'a> DUintf for DU<'a> {
     // returns a read-only reference
-    fn buffer_read_only(&self) -> &Vec<u8> {
+    fn buffer_read_only(&self) -> &[u8] {
         self.buffer.read_only()
     }
     // returns a read-write reference 
-    fn buffer_read_write(&mut self) -> &mut Vec<u8> {
+    fn buffer_read_write(&mut self) -> &mut [u8] {
         self.buffer.read_write()
+    }
+    // change size
+    fn resize(&mut self, new_size: usize) {
+        self.buffer.resize(new_size);
     }
 }
 
@@ -572,13 +589,13 @@ impl<'a> DU<'a> {
         }
     }
     // wraps data for read-only
-    pub fn new_read_only(reference: &Vec<u8>) -> DU {
+    pub fn new_read_only(reference: &[u8]) -> DU {
         DU {
             buffer: HybridVector::new_read_only(reference)
         }
     }
     // wraps data for read-write
-    pub fn new_read_write(reference: &mut Vec<u8>) -> DU {
+    pub fn new_read_write(reference: &mut [u8]) -> DU {
         DU {
             buffer: HybridVector::new_read_write(reference)
         }
