@@ -434,38 +434,38 @@ pub trait DUintf {
 /////////////////
 
 // Data Unit's internal vector that supports different type of ownerships
-enum HybridVector<'a> {
+pub enum HybridVector<'a> {
     Owner(Vec<u8>),
     ReadWrite(&'a mut [u8]),
     ReadOnly(&'a [u8]),
 }
 impl<'a> HybridVector<'a> {
     // default constructor
-    fn new() -> HybridVector<'a> {
+    pub fn new() -> HybridVector<'a> {
         HybridVector::Owner(Vec::new())
     }
     // copy constructor
-    fn new_clone(value: &Vec<u8>) -> HybridVector<'a> {
+    pub fn new_clone(value: &Vec<u8>) -> HybridVector<'a> {
         HybridVector::Owner(value.to_vec())
     }
     // allocating constructor
-    fn new_alloc(size: usize) -> HybridVector<'a> {
+    pub fn new_alloc(size: usize) -> HybridVector<'a> {
         HybridVector::Owner(vec![0; size])
     }
     // move ownership
-    fn new_owner(value: Vec<u8>) -> HybridVector<'a> {
+    pub fn new_owner(value: Vec<u8>) -> HybridVector<'a> {
         HybridVector::Owner(value)
     }
     // wraps data for read-only
-    fn new_read_only(reference: &[u8]) -> HybridVector {
+    pub fn new_read_only(reference: &[u8]) -> HybridVector {
         HybridVector::ReadOnly(reference)
     }
     // wraps data for read-write
-    fn new_read_write(reference: &mut [u8]) -> HybridVector {
+    pub fn new_read_write(reference: &mut [u8]) -> HybridVector {
         HybridVector::ReadWrite(reference)
     }
     // returns a read-only reference
-    fn read_only(&self) -> &[u8] {
+    pub fn read_only(&self) -> &[u8] {
         match self {
             &HybridVector::Owner(ref read_write_ref) => {
                 read_write_ref.as_slice()
@@ -479,7 +479,7 @@ impl<'a> HybridVector<'a> {
         }
     }
     // returns a read-write reference
-    fn read_write(&mut self) -> &mut [u8] {
+    pub fn read_write(&mut self) -> &mut [u8] {
         match self {
             &mut HybridVector::Owner(ref mut read_write_ref) => {
                 read_write_ref.as_mut_slice()
@@ -493,7 +493,7 @@ impl<'a> HybridVector<'a> {
         }
     }
     // returns a read-write reference
-    fn mut_vec(&mut self) -> &mut Vec<u8> {
+    pub fn mut_vec(&mut self) -> &mut Vec<u8> {
         match self {
             &mut HybridVector::Owner(ref mut read_write_ref) => {
                 read_write_ref
@@ -504,7 +504,7 @@ impl<'a> HybridVector<'a> {
         }
     }
     // change size
-    fn resize(&mut self, new_size: usize) {
+    pub fn resize(&mut self, new_size: usize) {
         let old_size = self.read_only().len();
         if old_size < new_size {
             let additional = new_size - old_size;

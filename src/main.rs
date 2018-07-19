@@ -17,4 +17,5 @@ extern crate space_rust_library;
 fn main() {
     space_rust_library::util_tests::du_tests::test();
     space_rust_library::util_tests::exception_tests::test();
+    space_rust_library::ccsds_tests::packet_tests::test();
 }

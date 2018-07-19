@@ -10,7 +10,12 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the MIT License   *
 // for more details.                                                          *
 //*****************************************************************************
-// Module configuration                                                       *
+// CCSDS Stack - CCSDS Packet Module - Unit tests                             *
 //*****************************************************************************
-pub mod du_tests;
-pub mod exception_tests;
+use ccsds::packet;
+use util::du::DUintf;
+
+pub fn test() {
+    let packet = packet::Packet::new();
+    println!("packet = {}", packet.dump_str());
+}
