@@ -122,7 +122,7 @@ impl<'a> Packet<'a> {
     // default constructor
     pub fn new() -> Packet<'a> {
         let mut packet = Packet {
-            buffer: du::HybridVector::new_alloc(PRIMARY_HEADER_BYTE_SIZE)
+            buffer: du::HybridVector::new_alloc(PRIMARY_HEADER_BYTE_SIZE + 1)
         };
         packet.set_packet_length().unwrap();
         packet
@@ -213,7 +213,7 @@ impl<'a> TMpacket<'a> {
     // default constructor
     pub fn new() -> TMpacket<'a> {
         let mut packet = TMpacket {
-            buffer: du::HybridVector::new_alloc(PRIMARY_HEADER_BYTE_SIZE)
+            buffer: du::HybridVector::new_alloc(PRIMARY_HEADER_BYTE_SIZE + 1)
         };
         packet.set_packet_length().unwrap();
         packet
@@ -304,7 +304,7 @@ impl<'a> TCpacket<'a> {
     // default constructor
     pub fn new() -> TCpacket<'a> {
         let mut packet = TCpacket {
-            buffer: du::HybridVector::new_alloc(PRIMARY_HEADER_BYTE_SIZE)
+            buffer: du::HybridVector::new_alloc(PRIMARY_HEADER_BYTE_SIZE + 1)
         };
         packet.set_packet_length().unwrap();
         packet
