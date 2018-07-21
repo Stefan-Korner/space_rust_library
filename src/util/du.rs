@@ -43,7 +43,7 @@ pub struct BitAccessor {
 #[macro_export]
 macro_rules! def_bit_accessor {
     ($acc_name: ident, $bit_pos: expr, $bit_length: expr) => {
-        const $acc_name: du::BitAccessor = du::BitAccessor {bit_pos: $bit_pos, bit_length: $bit_length};
+        pub const $acc_name: du::BitAccessor = du::BitAccessor {bit_pos: $bit_pos, bit_length: $bit_length};
     };
 }
 
@@ -54,7 +54,7 @@ pub struct ByteAccessor {
 #[macro_export]
 macro_rules! def_byte_accessor {
     ($acc_name: ident, $byte_pos: expr, $byte_length: expr) => {
-        const $acc_name: du::ByteAccessor = du::ByteAccessor {byte_pos: $byte_pos, byte_length: $byte_length};
+        pub const $acc_name: du::ByteAccessor = du::ByteAccessor {byte_pos: $byte_pos, byte_length: $byte_length};
     };
 }
 
@@ -65,7 +65,7 @@ pub struct UnsignedAccessor {
 #[macro_export]
 macro_rules! def_unsigned_accessor {
     ($acc_name: ident, $byte_pos: expr, $byte_length: expr) => {
-        const $acc_name: du::UnsignedAccessor = du::UnsignedAccessor {byte_pos: $byte_pos, byte_length: $byte_length};
+        pub const $acc_name: du::UnsignedAccessor = du::UnsignedAccessor {byte_pos: $byte_pos, byte_length: $byte_length};
     };
 }
 
@@ -76,9 +76,13 @@ pub struct BigUnsignedAccessor {
 #[macro_export]
 macro_rules! def_big_unsigned_accessor {
     ($acc_name: ident, $byte_pos: expr, $byte_length: expr) => {
-        const $acc_name: du::BigUnsignedAccessor = du::BigUnsignedAccessor {byte_pos: $byte_pos, byte_length: $byte_length};
+        pub const $acc_name: du::BigUnsignedAccessor = du::BigUnsignedAccessor {byte_pos: $byte_pos, byte_length: $byte_length};
     };
 }
+
+//#################
+// DU...Data Unit #
+//#################
 
 /////////////////////
 // interface trait //
