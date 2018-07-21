@@ -18,4 +18,8 @@ use util::du::DUintf;
 pub fn test() {
     let packet = packet::Packet::new();
     println!("packet = {}", packet.dump_str());
+    let tm_packet = packet::TMpacket::new();
+    println!("tm_packet = {}", tm_packet.dump_str());
+    let tc_packet = packet::TCpacket::new();
+    println!("tc_packet = {}", tc_packet.dump_str());
 }
