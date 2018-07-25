@@ -10,9 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the MIT License   *
 // for more details.                                                          *
 //*****************************************************************************
-// Module configuration                                                       *
+// Utilities - Cyclic Redundancy Check (CRC)                                  *
 //*****************************************************************************
-pub mod crc;
-#[macro_use]
-pub mod du;
-pub mod exception;
+
+// calculates the CRC-16 from the byte array
+pub fn calculate16(_bytes: &[u8], _size: usize) -> u16 {
+    // TODO: real implementation
+    1234
+}

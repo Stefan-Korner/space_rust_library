@@ -14,6 +14,7 @@
 //*****************************************************************************
 use std::ops;
 use std::u32;
+use util::crc;
 use util::du;
 use util::du::DUintf;
 use util::exception;
@@ -35,7 +36,14 @@ pub const TM_N_BYTE_SIZE: usize = 4;
 pub const TC_N_BYTE_SIZE: usize = 0;
 pub mod primary_header {
     use util::du;
-    def_unsigned_accessor!(PACKET_LENGTH, 4, 2);
+    def_bit_accessor!(VERSION_NUMBER,          0,  3);
+    def_bit_accessor!(PACKET_TYPE,             3,  1);
+    def_bit_accessor!(DATA_FIELD_HEADER_FLAG,  4,  1);
+    def_bit_accessor!(APPLICATION_PROCESS_ID,  5, 11);
+    // byte 2
+    def_bit_accessor!(SEGMENTATION_FLAGS,     16,  2);
+    def_bit_accessor!(SEQUENCE_CONTROL_COUNT, 18, 14);
+    def_unsigned_accessor!(PACKET_LENGTH,      4,  2);
 }
 
 //########################
@@ -51,6 +59,58 @@ pub trait PacketIntf: du::DUintf {
     // access methods (convenience methods) //
     //////////////////////////////////////////
 
+    fn get_version_number_field(&self) ->
+        Result<u32, exception::Exception> {
+        self.get_bits_acc(primary_header::VERSION_NUMBER)
+    }
+    fn set_version_number_field(&mut self, value: u32) ->
+        Result<(), exception::Exception> {
+        self.set_bits_acc(primary_header::VERSION_NUMBER, value)
+    }
+    fn get_packet_type_field(&self) ->
+        Result<u32, exception::Exception> {
+        self.get_bits_acc(primary_header::PACKET_TYPE)
+    }
+    fn set_packet_type_field(&mut self, value: u32) ->
+        Result<(), exception::Exception> {
+        self.set_bits_acc(primary_header::PACKET_TYPE, value)
+    }
+    fn get_data_field_header_flag_field(&self) ->
+        Result<u32, exception::Exception> {
+        self.get_bits_acc(primary_header::DATA_FIELD_HEADER_FLAG)
+    }
+    fn set_data_field_header_flag_field(&mut self, value: u32) ->
+        Result<(), exception::Exception> {
+        self.set_bits_acc(primary_header::DATA_FIELD_HEADER_FLAG, value)
+    }
+    fn get_application_process_id_field(&self) ->
+        Result<u32, exception::Exception> {
+        self.get_bits_acc(primary_header::APPLICATION_PROCESS_ID)
+    }
+    fn set_application_process_id_field(&mut self, value: u32) ->
+        Result<(), exception::Exception> {
+        self.set_bits_acc(primary_header::APPLICATION_PROCESS_ID, value)
+    }
+    fn get_segmentation_flags_field(&self) ->
+        Result<u32, exception::Exception> {
+        self.get_bits_acc(primary_header::SEGMENTATION_FLAGS)
+    }
+    fn set_segmentation_flags_field(&mut self, value: u32) ->
+        Result<(), exception::Exception> {
+        self.set_bits_acc(primary_header::SEGMENTATION_FLAGS, value)
+    }
+    fn get_sequence_control_count_field(&self) ->
+        Result<u32, exception::Exception> {
+        self.get_bits_acc(primary_header::SEQUENCE_CONTROL_COUNT)
+    }
+    fn set_sequence_control_count_field(&mut self, value: u32) ->
+        Result<(), exception::Exception> {
+        self.set_bits_acc(primary_header::SEQUENCE_CONTROL_COUNT, value)
+    }
+    fn get_packet_length_field(&self) ->
+        Result<u32, exception::Exception> {
+        self.get_unsigned_acc(primary_header::PACKET_LENGTH)
+    }
     fn set_packet_length_field(&mut self, value: u32) ->
         Result<(), exception::Exception> {
         self.set_unsigned_acc(primary_header::PACKET_LENGTH, value)
@@ -71,6 +131,34 @@ pub trait PacketIntf: du::DUintf {
             return Err(exception::raise("packet size is too large"));
         }
         self.set_packet_length_field(length_value as u32)
+    }
+    // checks the packetLength according to the data unit's buffer size
+    fn check_packet_length(&self) ->
+        Result<(bool), exception::Exception> {
+        Ok((self.get_packet_length_field()? as usize) ==
+           (self.size() - PRIMARY_HEADER_BYTE_SIZE - 1))
+    }
+    // sets the checksum out of the binary data,
+    // buffer and packetLength must be correctly initialised
+    fn set_checksum(&mut self) ->
+        Result<(), exception::Exception> {
+        if !self.check_packet_length()? {
+            return Err(exception::raise("inconsistent packet length"));
+        }
+        let crc_pos = self.size() - CRC_BYTE_SIZE;
+        let crc = crc::calculate16(self.buffer_read_only(), crc_pos);
+        self.set_unsigned(crc_pos, CRC_BYTE_SIZE, crc as u32)
+    }
+    // checks the checksum out of the binary data,
+    // buffer and, packetLength must be correctly initialised
+    fn check_checksum(&self) ->
+        Result<(bool), exception::Exception> {
+        if !self.check_packet_length()? {
+            return Ok(false);
+        }
+        let crc_pos = self.size() - CRC_BYTE_SIZE;
+        let crc = crc::calculate16(self.buffer_read_only(), crc_pos);
+        Ok(self.get_unsigned(crc_pos, CRC_BYTE_SIZE)? == (crc as u32))
     }
 }
 
