@@ -10,34 +10,30 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the MIT License   *
 // for more details.                                                          *
 //*****************************************************************************
-// Library configuration                                                      *
+// Assert helpers for unit tests                                              *
 //*****************************************************************************
-pub mod test_helpers;
-#[macro_use]
-pub mod util;
-pub mod util_tests;
-pub mod ccsds;
-pub mod ccsds_tests;
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_util_crc() {
-        ::util_tests::crc_tests::test();
-    }
+pub fn dump_u8(val_name: &str, val: u8, expected: u8) {
+    println!("{} = {}", val_name, val);
+    assert_eq!(val, expected);
+}
 
-    #[test]
-    fn test_util_du() {
-        ::util_tests::du_tests::test();
-    }
+pub fn dump_u16(val_name: &str, val: u16, expected: u16) {
+    println!("{} = {}", val_name, val);
+    assert_eq!(val, expected);
+}
 
-    #[test]
-    fn test_util_exception() {
-        ::util_tests::exception_tests::test();
-    }
+pub fn dump_u32(val_name: &str, val: u32, expected: u32) {
+    println!("{} = {}", val_name, val);
+    assert_eq!(val, expected);
+}
 
-    #[test]
-    fn test_ccsds_packet() {
-        ::ccsds_tests::packet_tests::test();
-    }
+pub fn dump_u64(val_name: &str, val: u64, expected: u64) {
+    println!("{} = {}", val_name, val);
+    assert_eq!(val, expected);
+}
+
+pub fn dump_usize(val_name: &str, val: usize, expected: usize) {
+    println!("{} = {}", val_name, val);
+    assert_eq!(val, expected);
 }

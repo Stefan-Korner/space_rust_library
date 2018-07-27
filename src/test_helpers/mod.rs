@@ -10,34 +10,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the MIT License   *
 // for more details.                                                          *
 //*****************************************************************************
-// Library configuration                                                      *
+// Module configuration                                                       *
 //*****************************************************************************
-pub mod test_helpers;
-#[macro_use]
-pub mod util;
-pub mod util_tests;
-pub mod ccsds;
-pub mod ccsds_tests;
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_util_crc() {
-        ::util_tests::crc_tests::test();
-    }
-
-    #[test]
-    fn test_util_du() {
-        ::util_tests::du_tests::test();
-    }
-
-    #[test]
-    fn test_util_exception() {
-        ::util_tests::exception_tests::test();
-    }
-
-    #[test]
-    fn test_ccsds_packet() {
-        ::ccsds_tests::packet_tests::test();
-    }
-}
+pub mod assert;
