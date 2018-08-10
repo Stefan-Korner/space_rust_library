@@ -20,7 +20,7 @@ pub fn calculate16(bytes: &[u8], size: usize) -> u16 {
     // D16        : MSB after shift
     // D17 - D31  : not used
     // shift register preset with all ones
-    let mut shift_reg = 0x0000FFFF_u32;
+    let mut shift_reg = 0x0000ffff_u32;
     // generator polynom D0-D15: X^16 + X^12 + X^5 + X^0
     let polynom = 0x00001021_u32;
     for i in 0..size {
@@ -45,5 +45,5 @@ pub fn calculate16(bytes: &[u8], size: usize) -> u16 {
             // and XORing with zero has no effect
         }
     }
-    (shift_reg & 0x0000FFFF_u32) as u16
+    (shift_reg & 0x0000ffff_u32) as u16
 }

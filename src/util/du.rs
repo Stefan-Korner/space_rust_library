@@ -22,14 +22,14 @@ use util::exception;
 
 // index = [first_bit_in_byte_pos][last_bit_in_byte_pos]
 const BIT_FILTER: [[u8; 8]; 8] = [
-    [0x7F, 0x3F, 0x1F, 0x0F, 0x07, 0x03, 0x01, 0x00],
-    [   0, 0xBF, 0x9F, 0x8F, 0x87, 0x83, 0x81, 0x80],
-    [   0,    0, 0xDF, 0xCF, 0xC7, 0xC3, 0xC1, 0xC0],
-    [   0,    0,    0, 0xEF, 0xE7, 0xE3, 0xE1, 0xE0],
-    [   0,    0,    0,    0, 0xF7, 0xF3, 0xF1, 0xF0],
-    [   0,    0,    0,    0,    0, 0xFB, 0xF9, 0xF8],
-    [   0,    0,    0,    0,    0,    0, 0xFD, 0xFC],
-    [   0,    0,    0,    0,    0,    0,    0, 0xFE]
+    [0x7f, 0x3f, 0x1f, 0x0f, 0x07, 0x03, 0x01, 0x00],
+    [   0, 0xbf, 0x9f, 0x8f, 0x87, 0x83, 0x81, 0x80],
+    [   0,    0, 0xdf, 0xcf, 0xc7, 0xc3, 0xc1, 0xc0],
+    [   0,    0,    0, 0xef, 0xe7, 0xe3, 0xe1, 0xe0],
+    [   0,    0,    0,    0, 0xf7, 0xf3, 0xf1, 0xf0],
+    [   0,    0,    0,    0,    0, 0xfb, 0xf9, 0xf8],
+    [   0,    0,    0,    0,    0,    0, 0xfd, 0xfc],
+    [   0,    0,    0,    0,    0,    0,    0, 0xfe]
 ];
 
 ///////////////////////////////////
@@ -247,7 +247,7 @@ pub trait DUintf {
         // decompose the aligned_value and add it to the buffer
         // starting at byte_pos, which is at the last byte
         while byte_pos >= first_byte_pos {
-            let byte = (aligned_value & 0xFF) as u8;
+            let byte = (aligned_value & 0xff) as u8;
             self.buffer_read_write()[byte_pos] += byte;
             aligned_value >>= 8;
             if byte_pos == 0 {
@@ -349,7 +349,7 @@ pub trait DUintf {
         let mut next_byte_pos = first_byte_pos + byte_length - 1;
         let mut next_value = value;
         while next_byte_pos >= first_byte_pos {
-            let byte = (next_value & 0xFF) as u8;
+            let byte = (next_value & 0xff) as u8;
             self.buffer_read_write()[next_byte_pos] = byte;
             next_value >>= 8;
             if next_byte_pos == 0 {
@@ -413,7 +413,7 @@ pub trait DUintf {
         let mut next_byte_pos = first_byte_pos + byte_length - 1;
         let mut next_value = value;
         while next_byte_pos >= first_byte_pos {
-            let byte = (next_value & 0xFF) as u8;
+            let byte = (next_value & 0xff) as u8;
             self.buffer_read_write()[next_byte_pos] = byte;
             next_value >>= 8;
             if next_byte_pos == 0 {
