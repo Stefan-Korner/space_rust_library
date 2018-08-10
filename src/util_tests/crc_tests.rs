@@ -19,6 +19,24 @@ use util::crc;
 // constants //
 ///////////////
 
+// test patterns for CRC 8
+const SPW_RMAP_HEADER1: [u8; 15] = [
+    0xfe, 0x01, 0x6c, 0x00, 0x67, 0x00, 0x00, 0x00,
+    0xa0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10
+];
+const SPW_RMAP_HEADER1_CRC: u8 = 0x9f;
+
+const SPW_RMAP_DATA1: [u8; 16] = [
+    0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+    0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17
+];
+const SPW_RMAP_DATA1_CRC: u8 = 0x56;
+
+const SPW_RMAP_HEADER2: [u8; 7] = [
+    0x67, 0x01, 0x2c, 0x00, 0xfe, 0x00, 0x00
+];
+const SPW_RMAP_HEADER2_CRC: u8 = 0xed;
+
 // test patterns for CRC 16
 const TC_PACKET_01: [u8; 276] = [
     0x1a, 0x8c, 0xc0, 0x0e, 0x01, 0x0d, 0x19, 0x06,
@@ -101,6 +119,28 @@ const TC_FRAME_02: [u8; 36] = [
     0xac, 0x8f, 0x00, 0x68
 ];
 
+///////////////
+// functions //
+///////////////
+
+fn test_crc8_operation() {
+    let pkt = SPW_RMAP_HEADER1;
+    let pkt_size = pkt.len();
+    let crc = crc::calculate8(&pkt, pkt_size);
+    let expected_crc = SPW_RMAP_HEADER1_CRC;
+    assert::dump_u8("crc", crc, expected_crc);
+    let pkt = SPW_RMAP_DATA1;
+    let pkt_size = pkt.len();
+    let crc = crc::calculate8(&pkt, pkt_size);
+    let expected_crc = SPW_RMAP_DATA1_CRC;
+    assert::dump_u8("crc", crc, expected_crc);
+    let pkt = SPW_RMAP_HEADER2;
+    let pkt_size = pkt.len();
+    let crc = crc::calculate8(&pkt, pkt_size);
+    let expected_crc = SPW_RMAP_HEADER2_CRC;
+    assert::dump_u8("crc", crc, expected_crc);
+}
+
 fn test_crc16_operation() {
     let pkt = TC_PACKET_01;
     let pkt_size = pkt.len();
@@ -120,5 +160,6 @@ fn test_crc16_operation() {
 }
 
 pub fn test() {
-    test_crc16_operation()
+    test_crc8_operation();
+    test_crc16_operation();
 }
