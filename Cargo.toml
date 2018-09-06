@@ -16,6 +16,7 @@
 [package]
 name = "space_rust_library"
 version = "0.1.0"
-authors = ["Stefan Korner"]
+authors = ["Stefan Korner <korner-hajek@gmx.at>"]
 
 [dependencies]
+lazy_static = "1.1.0"
