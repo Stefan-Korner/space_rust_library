@@ -10,11 +10,15 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the MIT License   *
 // for more details.                                                          *
 //*****************************************************************************
-// Module configuration                                                       *
+// Utilities - Time Correlation - Unit tests                                  *
 //*****************************************************************************
-pub mod config;
-pub mod crc;
-#[macro_use]
-pub mod du;
-pub mod exception;
-pub mod tco;
+
+use util::tco;
+
+///////////////
+// functions //
+///////////////
+
+pub fn test() {
+    // placeholder - TODO: implement unit test(s)
+}

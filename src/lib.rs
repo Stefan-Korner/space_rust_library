@@ -44,6 +44,11 @@ mod tests {
     }
 
     #[test]
+    fn test_util_tco() {
+        ::util_tests::tco_tests::test();
+    }
+
+    #[test]
     fn test_ccsds_packet() {
         ::ccsds_tests::packet_tests::test();
     }
