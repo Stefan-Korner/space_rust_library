@@ -20,5 +20,10 @@ use util::tco;
 ///////////////
 
 pub fn test() {
-    // placeholder - TODO: implement unit test(s)
+    println!(
+        "ert_mission_epoch_with_leap_seconds = {}",
+        tco::get_ert_mission_epoch_with_leap_seconds());
+    println!(
+        "obt_mission_epoch_with_leap_seconds = {}",
+        tco::get_obt_mission_epoch_with_leap_seconds());
 }
