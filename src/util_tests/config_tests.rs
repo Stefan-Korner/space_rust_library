@@ -10,9 +10,16 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the MIT License   *
 // for more details.                                                          *
 //*****************************************************************************
-// Module configuration                                                       *
+// Utilities - Configuration File Handling - Unit tests                       *
 //*****************************************************************************
-pub mod config_tests;
-pub mod crc_tests;
-pub mod du_tests;
-pub mod exception_tests;
+
+use util::config;
+
+///////////////
+// functions //
+///////////////
+
+pub fn test() {
+    // checks if the config file can be read, otherwise panic
+    config::force_config_items_read();
+}

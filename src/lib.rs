@@ -12,6 +12,8 @@
 //*****************************************************************************
 // Library configuration                                                      *
 //*****************************************************************************
+#[macro_use]
+extern crate lazy_static;
 pub mod test_helpers;
 #[macro_use]
 pub mod util;
@@ -21,6 +23,11 @@ pub mod ccsds_tests;
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn test_util_config() {
+        ::util_tests::config_tests::test();
+    }
+
     #[test]
     fn test_util_crc() {
         ::util_tests::crc_tests::test();
