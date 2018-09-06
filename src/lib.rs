@@ -49,6 +49,11 @@ mod tests {
     }
 
     #[test]
+    fn test_util_time() {
+        ::util_tests::time_tests::test();
+    }
+
+    #[test]
     fn test_ccsds_packet() {
         ::ccsds_tests::packet_tests::test();
     }
