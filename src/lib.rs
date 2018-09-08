@@ -14,6 +14,7 @@
 //*****************************************************************************
 #[macro_use]
 extern crate lazy_static;
+extern crate time;
 pub mod test_helpers;
 #[macro_use]
 pub mod util;
@@ -49,8 +50,8 @@ mod tests {
     }
 
     #[test]
-    fn test_util_time() {
-        ::util_tests::time_tests::test();
+    fn test_util_xtime() {
+        ::util_tests::xtime_tests::test();
     }
 
     #[test]

@@ -17,4 +17,4 @@ pub mod crc_tests;
 pub mod du_tests;
 pub mod exception_tests;
 pub mod tco_tests;
-pub mod time_tests;
+pub mod xtime_tests;

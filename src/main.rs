@@ -20,6 +20,6 @@ fn main() {
     space_rust_library::util_tests::du_tests::test();
     space_rust_library::util_tests::exception_tests::test();
     space_rust_library::util_tests::tco_tests::test();
-    space_rust_library::util_tests::time_tests::test();
+    space_rust_library::util_tests::xtime_tests::test();
     space_rust_library::ccsds_tests::packet_tests::test();
 }
