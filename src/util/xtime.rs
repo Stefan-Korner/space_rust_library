@@ -17,6 +17,7 @@
 //*****************************************************************************
 
 use time;
+use util::exception;
 
 ///////////////
 // functions //
@@ -86,4 +87,96 @@ pub fn get_asd_time_str_with_nano(timespec: time::Timespec) -> String {
         tm.tm_min,
         tm.tm_sec,
         tm.tm_nsec)
+}
+
+// extracts a timespec from an ASD formated string
+pub fn parse_asd_time(asd_time: &str) ->
+    Result<time::Timespec, exception::Exception> {
+    let seconds_part = &asd_time[..17];
+    let seconds_fraction = &asd_time[17..];
+    let nsec = match seconds_fraction.len() {
+        0 => 0_i32,
+        1 => 0_i32,
+        2 => {
+            let parse_result = seconds_fraction[1..2].parse::<i32>();
+            if parse_result.is_err() {
+                return Err(exception::raise("parse error in seconds fraction"));
+             }
+             parse_result.unwrap() * 100000000
+        },
+        3 => {
+            let parse_result = seconds_fraction[1..3].parse::<i32>();
+            if parse_result.is_err() {
+                return Err(exception::raise("parse error in seconds fraction"));
+             }
+             parse_result.unwrap() * 10000000
+        },
+        4 => {
+            let parse_result = seconds_fraction[1..4].parse::<i32>();
+            if parse_result.is_err() {
+                return Err(exception::raise("parse error in seconds fraction"));
+             }
+             parse_result.unwrap() * 1000000
+        },
+        5 => {
+            let parse_result = seconds_fraction[1..5].parse::<i32>();
+            if parse_result.is_err() {
+                return Err(exception::raise("parse error in seconds fraction"));
+             }
+             parse_result.unwrap() * 100000
+        },
+        6 => {
+            let parse_result = seconds_fraction[1..6].parse::<i32>();
+            if parse_result.is_err() {
+                return Err(exception::raise("parse error in seconds fraction"));
+             }
+             parse_result.unwrap() * 10000
+        },
+        7 => {
+            let parse_result = seconds_fraction[1..7].parse::<i32>();
+            if parse_result.is_err() {
+                return Err(exception::raise("parse error in seconds fraction"));
+             }
+             parse_result.unwrap() * 1000
+        },
+        8 => {
+            let parse_result = seconds_fraction[1..8].parse::<i32>();
+            if parse_result.is_err() {
+                return Err(exception::raise("parse error in seconds fraction"));
+             }
+             parse_result.unwrap() * 100
+        },
+        9 => {
+            let parse_result = seconds_fraction[1..9].parse::<i32>();
+            if parse_result.is_err() {
+                return Err(exception::raise("parse error in seconds fraction"));
+             }
+             parse_result.unwrap() * 10
+        },
+        10 => {
+            let parse_result = seconds_fraction[1..10].parse::<i32>();
+            if parse_result.is_err() {
+                return Err(exception::raise("parse error in seconds fraction"));
+             }
+             parse_result.unwrap()
+        },
+        _ => {
+             return Err(exception::raise("parse error in seconds fraction"));
+        },
+    };
+    let parse_result = time::strptime(seconds_part, "%Y.%j.%H.%M.%S");
+    if parse_result.is_err() {
+        return Err(exception::raise("parse error in seconds part"));
+    }
+    let mut tm = parse_result.unwrap();
+    // mday and mon are 0 after the parse -->
+    // set it to 1st January
+    tm.tm_mday = 1;
+    // consider nano-seconds
+    tm.tm_nsec = nsec;
+    let mut timespec = tm.to_timespec();
+    // to_timespec() does not consider the yday --> do this now
+    let yday_compensation = tm.tm_yday * (24 * 60 * 60);
+    timespec.sec += yday_compensation as i64;
+    Ok(timespec)
 }
