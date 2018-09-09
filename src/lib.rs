@@ -25,6 +25,11 @@ pub mod ccsds_tests;
 #[cfg(test)]
 mod tests {
     #[test]
+    fn test_util_asd_time() {
+        ::util_tests::asd_time_tests::test();
+    }
+
+    #[test]
     fn test_util_config() {
         ::util_tests::config_tests::test();
     }
@@ -47,11 +52,6 @@ mod tests {
     #[test]
     fn test_util_tco() {
         ::util_tests::tco_tests::test();
-    }
-
-    #[test]
-    fn test_util_xtime() {
-        ::util_tests::xtime_tests::test();
     }
 
     #[test]

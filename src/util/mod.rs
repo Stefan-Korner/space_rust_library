@@ -12,10 +12,10 @@
 //*****************************************************************************
 // Module configuration                                                       *
 //*****************************************************************************
+pub mod asd_time;
 pub mod config;
 pub mod crc;
 #[macro_use]
 pub mod du;
 pub mod exception;
 pub mod tco;
-pub mod xtime;

@@ -10,11 +10,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the MIT License   *
 // for more details.                                                          *
 //*****************************************************************************
-// Utilities - Basic Time Conversions - Unit tests                            *
+// Utilities - ASD Time Conversions - Unit tests                              *
 //*****************************************************************************
 
 use time;
-use util::xtime;
+use util::asd_time;
 
 ///////////////
 // functions //
@@ -24,30 +24,30 @@ pub fn print_time(title: &str, prefix: &str, timespec: time::Timespec) {
     println!("----- {} -----", title);
     println!("{}: timespec.sec = {}", prefix, timespec.sec);
     println!("{}: timespec.nsec = {}", prefix, timespec.nsec);
-    let time_str = xtime::get_asd_time_str(timespec);
+    let time_str = asd_time::get_time_str(timespec);
     println!("{} = {}", prefix, time_str);
-    let time_str = xtime::get_asd_time_str_with_milli(timespec);
+    let time_str = asd_time::get_time_str_with_milli(timespec);
     println!("{} = {}", prefix, time_str);
-    let time_str = xtime::get_asd_time_str_with_micro(timespec);
+    let time_str = asd_time::get_time_str_with_micro(timespec);
     println!("{} = {}", prefix, time_str);
-    let time_str = xtime::get_asd_time_str_with_nano(timespec);
+    let time_str = asd_time::get_time_str_with_nano(timespec);
     println!("{} = {}", prefix, time_str);
 }
 
-pub fn parse_time(title: &str, asd_time: &str) {
-    let time = xtime::parse_asd_time(asd_time).unwrap();
-    print_time(title, asd_time, time);
+pub fn parse_time(title: &str, time_str: &str) {
+    let time = asd_time::parse_time(time_str).unwrap();
+    print_time(title, time_str, time);
 }
 
 pub fn test() {
-    let zero_time = xtime::get_zero_time();
+    let zero_time = asd_time::get_zero_time();
     print_time("1970.001.00.00.00 / 0", "zero time", zero_time);
-    let gps_time = xtime::get_time(315964800, 0);
+    let gps_time = asd_time::get_time(315964800, 0);
     print_time("1980.006.00.00.00 / 315964800", "GPS time", gps_time);
     // depends on execution time
-    let actual_time = xtime::get_actual_time();
+    let actual_time = asd_time::get_actual_time();
     print_time("actual time", "actual time", actual_time);
-    // parse ASD time
+    // parse time
     parse_time("zero time 1970.001.00.00.00 / 0", "1970.001.00.00.00");
     parse_time("GPS time: 1980.006.00.00.00 / 315964800", "1980.006.00.00.00");
     parse_time("1980.006.01.02.03", "1980.006.01.02.03");

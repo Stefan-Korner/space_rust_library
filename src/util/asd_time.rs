@@ -10,10 +10,19 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the MIT License   *
 // for more details.                                                          *
 //*****************************************************************************
-// Utilities - Basic Time Conversions                                         *
+// Utilities - ASD Time Conversions                                           *
 //                                                                            *
-// Note: To avoid name clashes with std::time and Crate time, this module is  *
-//       named xtime instead of time.                                         *
+// ASD time format: YYYY.DDD.hh.mm.ss ............. no seconds fraction       *
+//                  YYYY.DDD.hh.mm.ss.MMM ......... milli seconds fraction    *
+//                  YYYY.DDD.hh.mm.ss.MMMMMM ...... micro seconds fraction    *
+//                  YYYY.DDD.hh.mm.ss.NNNNNNNNN ... nano seconds fraction     *
+//                  ^    ^   ^  ^  ^                                          *
+//                  |    |   |  |  +--------------- seconds 0...59            *
+//                  |    |   |  +------------------ minutes 0...59            *
+//                  |    |   +--------------------- hours   0...23            *
+//                  |    +------------------------- days in year 1...365/366  *
+//                  +------------------------------ years                     *
+// Conversions are from/to time::Timespec (from Crate time)                   *
 //*****************************************************************************
 
 use time;
@@ -23,23 +32,23 @@ use util::exception;
 // functions //
 ///////////////
 
-// returns the UNIX zero time
+// convenient function: returns the UNIX zero time
 pub fn get_time(sec: i64, nsec: i32) -> time::Timespec {
     time::Timespec::new(sec, nsec)
 }
 
-// returns the UNIX zero time
+// // convenient function: returns the UNIX zero time
 pub fn get_zero_time() -> time::Timespec {
     time::Timespec::new(0, 0)
 }
 
-// returns the actual time
+// // convenient function: returns the actual time
 pub fn get_actual_time() -> time::Timespec {
     time::get_time()
 }
 
 // returns the ASD format YYYY.DDD.hh.mm.ss
-pub fn get_asd_time_str(timespec: time::Timespec) -> String {
+pub fn get_time_str(timespec: time::Timespec) -> String {
     let tm = time::at_utc(timespec);
     format!(
         "{:04}.{:03}.{:02}.{:02}.{:02}",
@@ -51,7 +60,7 @@ pub fn get_asd_time_str(timespec: time::Timespec) -> String {
 }
 
 // returns the ASD format YYYY.DDD.hh.mm.ss.MMM
-pub fn get_asd_time_str_with_milli(timespec: time::Timespec) -> String {
+pub fn get_time_str_with_milli(timespec: time::Timespec) -> String {
     let tm = time::at_utc(timespec);
     format!(
         "{:04}.{:03}.{:02}.{:02}.{:02}.{:03}",
@@ -64,7 +73,7 @@ pub fn get_asd_time_str_with_milli(timespec: time::Timespec) -> String {
 }
 
 // returns the ASD format YYYY.DDD.hh.mm.ss.MMMMMM
-pub fn get_asd_time_str_with_micro(timespec: time::Timespec) -> String {
+pub fn get_time_str_with_micro(timespec: time::Timespec) -> String {
     let tm = time::at_utc(timespec);
     format!(
         "{:04}.{:03}.{:02}.{:02}.{:02}.{:06}",
@@ -77,7 +86,7 @@ pub fn get_asd_time_str_with_micro(timespec: time::Timespec) -> String {
 }
 
 // returns the ASD format YYYY.DDD.hh.mm.ss.NNNNNNNNN
-pub fn get_asd_time_str_with_nano(timespec: time::Timespec) -> String {
+pub fn get_time_str_with_nano(timespec: time::Timespec) -> String {
     let tm = time::at_utc(timespec);
     format!(
         "{:04}.{:03}.{:02}.{:02}.{:02}.{:09}",
@@ -90,10 +99,10 @@ pub fn get_asd_time_str_with_nano(timespec: time::Timespec) -> String {
 }
 
 // extracts a timespec from an ASD formated string
-pub fn parse_asd_time(asd_time: &str) ->
+pub fn parse_time(time_str: &str) ->
     Result<time::Timespec, exception::Exception> {
-    let seconds_part = &asd_time[..17];
-    let seconds_fraction = &asd_time[17..];
+    let seconds_part = &time_str[..17];
+    let seconds_fraction = &time_str[17..];
     let nsec = match seconds_fraction.len() {
         0 => 0_i32,
         1 => 0_i32,

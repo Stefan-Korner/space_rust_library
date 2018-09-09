@@ -15,11 +15,11 @@
 extern crate space_rust_library;
 
 fn main() {
+    space_rust_library::util_tests::asd_time_tests::test();
     space_rust_library::util_tests::config_tests::test();
     space_rust_library::util_tests::crc_tests::test();
     space_rust_library::util_tests::du_tests::test();
     space_rust_library::util_tests::exception_tests::test();
     space_rust_library::util_tests::tco_tests::test();
-    space_rust_library::util_tests::xtime_tests::test();
     space_rust_library::ccsds_tests::packet_tests::test();
 }
