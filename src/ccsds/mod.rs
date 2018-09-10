@@ -13,5 +13,5 @@
 // Module configuration                                                       *
 //*****************************************************************************
 #[macro_use]
+pub mod cuc_time;
 pub mod packet;
-pub mod time;
