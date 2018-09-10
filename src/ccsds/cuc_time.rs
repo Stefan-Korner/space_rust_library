@@ -11,7 +11,12 @@
 // for more details.                                                          *
 //*****************************************************************************
 // CUC TIME - CCSDS unsegmented time code                                     *
+//                                                                            *
+// Correlation to an epoch must be done explicitly via use of util::tco       *
 //*****************************************************************************
+use std::u32;
+use time;
+use util::exception;
 
 ///////////////
 // constants //
@@ -34,13 +39,13 @@ pub const T2_TIME_4_0: u8 = 0xac; // epoch: agency-def., 0 fine b.
 pub const T2_TIME_4_1: u8 = 0xad; // epoch: agency-def., 1 fine b.
 pub const T2_TIME_4_2: u8 = 0xae; // epoch: agency-def., 2 fine b.
 pub const T2_TIME_4_3: u8 = 0xaf; // epoch: agency-def., 3 fine b.
-// for internal use: TODO: change to private
-pub const CUCFINE3_TO_MICRO: f64 =  1000000_f64 / 16777216_f64;
-pub const CUCFINE2_TO_MICRO: f64 =  1000000_f64 /    65536_f64;
-pub const CUCFINE1_TO_MICRO: f64 =  1000000_f64 /      256_f64;
-pub const MICRO_TO_CUCFINE3: f64 = 16777216_f64 /  1000000_f64;
-pub const MICRO_TO_CUCFINE2: f64 =    65536_f64 /  1000000_f64;
-pub const MICRO_TO_CUCFINE1: f64 =      256_f64 /  1000000_f64;
+// for internal use
+const CUCFINE3_TO_NSEC: f64 = 1000000000_f64 /   16777216_f64;
+const CUCFINE2_TO_NSEC: f64 = 1000000000_f64 /      65536_f64;
+const CUCFINE1_TO_NSEC: f64 = 1000000000_f64 /        256_f64;
+const NSEC_TO_CUCFINE3: f64 =   16777216_f64 / 1000000000_f64;
+const NSEC_TO_CUCFINE2: f64 =      65536_f64 / 1000000000_f64;
+const NSEC_TO_CUCFINE1: f64 =        256_f64 / 1000000000_f64;
 
 ///////////////////////
 // struct definition //
@@ -94,21 +99,93 @@ impl Time {
             t_fine2
         }
     }
+    // initialization from timespec
+    pub fn new_from_timespec(p_field: u8, timespec: time::Timespec) ->
+        Result<Time, exception::Exception> {
+        let mut sec = timespec.sec;
+        if sec < 0 {
+            return Err(exception::raise("CUC time supports only positive seconds"));
+        }
+        if sec > (u32::MAX as i64) {
+            return Err(exception::raise(
+                &format!("CUC time supports positive seconds up to {}", u32::MAX)));
+        }
+        if timespec.nsec < 0 {
+            return Err(exception::raise("CUC time supports only positive second fractions"));
+        }
+        // convert fine time
+        let mut t_fine0 = 0_u8;
+        let mut t_fine1 = 0_u8;
+        let mut t_fine2 = 0_u8;
+        if (p_field == L1_TIME_4_3) || (p_field == L2_TIME_4_3) {
+            let nsec = timespec.nsec as f64;
+            let mut cuc_time_fine = (nsec * NSEC_TO_CUCFINE3) as u64;
+            t_fine2 = (cuc_time_fine & 0xFF) as u8;
+            cuc_time_fine >>= 8;
+            t_fine1 = (cuc_time_fine & 0xFF) as u8;
+            cuc_time_fine >>= 8;
+            t_fine0 = (cuc_time_fine & 0xFF) as u8;
+        } else if (p_field == L1_TIME_4_2) || (p_field == L2_TIME_4_2) {
+            let nsec = timespec.nsec as f64;
+            let mut cuc_time_fine = (nsec * NSEC_TO_CUCFINE2) as u64;
+            t_fine1 = (cuc_time_fine & 0xFF) as u8;
+            cuc_time_fine >>= 8;
+            t_fine0 = (cuc_time_fine & 0xFF) as u8;
+        } else if (p_field == L1_TIME_4_1) || (p_field == L2_TIME_4_1) {
+            let nsec = timespec.nsec as f64;
+            let cuc_time_fine = (nsec * NSEC_TO_CUCFINE1) as u64;
+            t_fine0 = (cuc_time_fine & 0xFF) as u8;
+        } else if (p_field != L1_TIME_4_0) && (p_field != L2_TIME_4_0) {
+            return Err(exception::raise("invalid P field for CUC time creation"));
+        }
+        // convert coarse time
+        let t_coarse3 = (sec & 0xFF) as u8;
+        sec >>= 8;
+        let t_coarse2 = (sec & 0xFF) as u8;
+        sec >>= 8;
+        let t_coarse1 = (sec & 0xFF) as u8;
+        sec >>= 8;
+        let t_coarse0 = (sec & 0xFF) as u8;
+        // create CUC time
+        Ok(Time {
+            p_field,
+            t_coarse0,
+            t_coarse1,
+            t_coarse2,
+            t_coarse3,
+            t_fine0,
+            t_fine1,
+            t_fine2
+        })
+    }
+    // conversion to timespec
+    pub fn to_timespec(&self) ->
+        Result<time::Timespec, exception::Exception> {
+        // convert fine time
+        let mut timespec_nsec = 0_i32;
+        if (self.p_field == L1_TIME_4_3) || (self.p_field == L2_TIME_4_3) {
+            let cuc_time_fine = ((self.t_fine0 as u64) * 0x010000_u64) +
+                                ((self.t_fine1 as u64) * 0x000100_u64) +
+                                ((self.t_fine2 as u64) * 0x000001_u64);
+            let nsec = (cuc_time_fine as f64) * CUCFINE3_TO_NSEC;
+            timespec_nsec = nsec as i32;
+        } else if (self.p_field == L1_TIME_4_2) || (self.p_field == L2_TIME_4_2) {
+            let cuc_time_fine = ((self.t_fine0 as u64) * 0x000100_u64) +
+                                ((self.t_fine1 as u64) * 0x000001_u64);
+            let nsec = (cuc_time_fine as f64) * CUCFINE2_TO_NSEC;
+            timespec_nsec = nsec as i32;
+        } else if (self.p_field == L1_TIME_4_1) || (self.p_field == L2_TIME_4_1) {
+            let cuc_time_fine = (self.t_fine1 as u64) * 0x000100_u64;
+            let nsec = (cuc_time_fine as f64) * CUCFINE1_TO_NSEC;
+            timespec_nsec = nsec as i32;
+        } else if (self.p_field != L1_TIME_4_0) && (self.p_field != L2_TIME_4_0) {
+            return Err(exception::raise("invalid P field for Timespec creation"));
+        }
+        // convert coarse time
+        let sec = ((self.t_coarse0 as i64) * 0x01000000_i64) +
+                  ((self.t_coarse1 as i64) * 0x00010000_i64) +
+                  ((self.t_coarse2 as i64) * 0x00000100_i64) +
+                  ((self.t_coarse3 as i64) * 0x00000001_i64);
+        Ok(time::Timespec::new(sec, timespec_nsec))
+    }
 }
-
-///////////////
-// functions //
-///////////////
-// the data in the buffer must start with the P field,
-// time correlation with a mission timeline is performed
-// TODO: UTIL::AbsTime convert(const void* p_buffer) throw(UTIL::Exception);
-
-// the data in the buffer are without the P field,
-// time correlation with a mission timeline is performed
-// TODO: UTIL::AbsTime convert(const void* p_buffer, TimeCode p_pField)
-// TODO:  throw(UTIL::Exception);
-
-// the data in the buffer start with the P field,
-// time correlation with a mission timeline is performed
-// TODO: Time convert(const UTIL::AbsTime& p_time, TimeCode p_pField)
-// TODO:  throw(UTIL::Exception);
