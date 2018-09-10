@@ -24,7 +24,6 @@
 //                  +------------------------------ years                     *
 // Conversions are from/to time::Timespec (from Crate time)                   *
 //*****************************************************************************
-
 use time;
 use util::exception;
 
@@ -101,6 +100,10 @@ pub fn get_time_str_with_nano(timespec: time::Timespec) -> String {
 // extracts a timespec from an ASD formated string
 pub fn parse_time(time_str: &str) ->
     Result<time::Timespec, exception::Exception> {
+    let time_str_len = time_str.len();
+    if time_str_len < 17 {
+        return Err(exception::raise(&format!("parse error: invalid string length {}", time_str_len)));
+    }
     let seconds_part = &time_str[..17];
     let seconds_fraction = &time_str[17..];
     let nsec = match seconds_fraction.len() {

@@ -19,7 +19,6 @@
 // The module is statically configured via entries in config.txt              *
 // Calculation are base on time::Timespec (from Crate time)                   *
 //*****************************************************************************
-
 use time;
 use util::asd_time;
 use util::config;

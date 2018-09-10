@@ -37,3 +37,8 @@ pub fn dump_usize(val_name: &str, val: usize, expected: usize) {
     println!("{} = {}", val_name, val);
     assert_eq!(val, expected);
 }
+
+pub fn dump_string(val_name: &str, val: &str, expected: &str) {
+    println!("{} = {}", val_name, val);
+    assert_eq!(val, expected);
+}
