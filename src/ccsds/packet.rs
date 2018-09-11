@@ -12,6 +12,7 @@
 //*****************************************************************************
 // CCSDS Stack - CCSDS Packet Module                                          *
 //*****************************************************************************
+use ccsds::cuc_time;
 use std::ops;
 use std::u32;
 use util::crc;
@@ -44,6 +45,21 @@ pub mod primary_header {
     def_bit_accessor!(SEGMENTATION_FLAGS,     16,  2);
     def_bit_accessor!(SEQUENCE_CONTROL_COUNT, 18, 14);
     def_unsigned_accessor!(PACKET_LENGTH,      4,  2);
+}
+
+///////////////////////////////////
+// accessors for different types //
+///////////////////////////////////
+
+pub struct CucTimeAccessor {
+    pub byte_pos: usize,
+    pub p_field: u8
+}
+#[macro_export]
+macro_rules! def_cuc_time_accessor {
+    ($acc_name: ident, $byte_pos: expr, $p_field: expr) => {
+        pub const $acc_name: packet::CucTimeAccessor = packet::CucTimeAccessor {byte_pos: $byte_pos, p_field: $p_field};
+    };
 }
 
 //########################
@@ -114,6 +130,58 @@ pub trait PacketIntf: du::DUintf {
     fn set_packet_length_field(&mut self, value: u32) ->
         Result<(), exception::Exception> {
         self.set_unsigned_acc(primary_header::PACKET_LENGTH, value)
+    }
+
+    /////////////////////
+    // field accessors //
+    /////////////////////
+
+    // CUC time  access
+    fn get_cuc_time(&self, _byte_pos: usize, _p_field: u8) ->
+        Result<cuc_time::Time, exception::Exception> {
+/*
+        // consistency checks
+        if byte_length == 0 {
+            return Err(exception::raise("invalid byte_length"));
+        }
+        let end_pos = byte_pos + byte_length;
+        if end_pos > self.size() {
+            return Err(exception::raise("byte_pos/byte_length out of buffer"));
+        }
+        Ok(&self.buffer_read_only()[byte_pos..end_pos])
+*/
+panic!();
+    }
+    fn set_cuc_time(&mut self, _byte_pos: usize, _p_field: u8, _cuc_time: cuc_time::Time) ->
+        Result<(), exception::Exception> {
+/*
+        // consistency checks
+        if byte_length == 0 {
+            return Err(exception::raise("invalid byte_length"));
+        }
+        if (byte_pos + byte_length) > self.size() {
+            return Err(exception::raise("byte_pos/byte_length out of buffer"));
+        }
+        // copy the minimum of bytes defined by byte_length and bytes
+        let num_bytes = cmp::min(byte_length, bytes.len());
+        let mut src_byte_pos = 0;
+        let mut dest_byte_pos = byte_pos;
+        while src_byte_pos < num_bytes {
+            self.buffer_read_write()[dest_byte_pos] = bytes[src_byte_pos];
+            src_byte_pos += 1;
+            dest_byte_pos += 1;
+        }
+        Ok(())
+*/
+panic!();
+    }
+    fn get_cuc_time_acc(&self, acc: CucTimeAccessor) ->
+        Result<cuc_time::Time, exception::Exception> {
+        self.get_cuc_time(acc.byte_pos, acc.p_field)
+    }
+    fn set_cuc_time_acc(&mut self, acc: CucTimeAccessor, cuc_time: cuc_time::Time) ->
+        Result<(), exception::Exception> {
+        self.set_cuc_time(acc.byte_pos, acc.p_field, cuc_time)
     }
 
     ///////////////////

@@ -19,6 +19,7 @@ pub mod test_helpers;
 #[macro_use]
 pub mod util;
 pub mod util_tests;
+#[macro_use]
 pub mod ccsds;
 pub mod ccsds_tests;
 

@@ -12,8 +12,11 @@
 //*****************************************************************************
 // CCSDS Stack - CCSDS Packet Module - Unit tests                             *
 //*****************************************************************************
+use ccsds::cuc_time;
 use ccsds::packet;
 use util::du::DUintf;
+
+def_cuc_time_accessor!(CUC_TIME_ACC1, 5, cuc_time::L2_TIME_4_3);
 
 pub fn test() {
     let packet = packet::Packet::new();
