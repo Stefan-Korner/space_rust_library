@@ -31,21 +31,6 @@ use util::exception;
 // functions //
 ///////////////
 
-// convenient function: returns the UNIX zero time
-pub fn get_time(sec: i64, nsec: i32) -> time::Timespec {
-    time::Timespec::new(sec, nsec)
-}
-
-// // convenient function: returns the UNIX zero time
-pub fn get_zero_time() -> time::Timespec {
-    time::Timespec::new(0, 0)
-}
-
-// // convenient function: returns the actual time
-pub fn get_actual_time() -> time::Timespec {
-    time::get_time()
-}
-
 // returns the ASD format YYYY.DDD.hh.mm.ss
 pub fn get_time_str(timespec: time::Timespec) -> String {
     let tm = time::at_utc(timespec);

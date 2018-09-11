@@ -81,12 +81,12 @@ fn test_parse_ok(time_str: &str, expected_sec: i64, expected_nsec: i32) {
 }
 
 pub fn test() {
-    let zero_time = asd_time::get_zero_time();
+    let zero_time = time::Timespec::new(0, 0);
     print_time("1970.001.00.00.00 / 0", "zero time", zero_time);
-    let gps_time = asd_time::get_time(315964800, 0);
+    let gps_time = time::Timespec::new(315964800, 0);
     print_time("1980.006.00.00.00 / 315964800", "GPS time", gps_time);
     // depends on execution time
-    let actual_time = asd_time::get_actual_time();
+    let actual_time = time::get_time();
     print_time("actual time", "actual time", actual_time);
     // format time tests
     test_format_ok(zero_time, "1970.001.00.00.00");

@@ -81,13 +81,13 @@ fn get_leap_seconds(leap_seconds_str: &str) -> time::Duration {
 fn get_mission_epoch(mission_epoch_str: &str) -> time::Duration {
     let timespec = match mission_epoch_str {
         "TAI_MISSION_EPOCH" => {
-            asd_time::get_time(TAI_MISSION_EPOCH_DELTA, 0)
+            time::Timespec::new(TAI_MISSION_EPOCH_DELTA, 0)
          },
         "UNIX_MISSION_EPOCH" => {
-            asd_time::get_time(UNIX_MISSION_EPOCH_DELTA, 0)
+            time::Timespec::new(UNIX_MISSION_EPOCH_DELTA, 0)
          },
         "GPS_MISSION_EPOCH" => {
-            asd_time::get_time(GPS_MISSION_EPOCH_DELTA, 0)
+            time::Timespec::new(GPS_MISSION_EPOCH_DELTA, 0)
          },
         _ => {
             asd_time::parse_time(mission_epoch_str).expect(
