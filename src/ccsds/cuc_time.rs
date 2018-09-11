@@ -50,6 +50,7 @@ const NSEC_TO_CUCFINE1: f64 =        256_f64 / 1000000000_f64;
 ///////////////////////
 // struct definition //
 ///////////////////////
+#[derive(Debug)]
 pub struct Time {
     pub p_field: u8,
     pub t_coarse0: u8,
@@ -68,7 +69,7 @@ impl Time {
     // default constructor
     pub fn new() -> Time {
         Time {
-            p_field: 0,
+            p_field: L2_TIME_4_0,
             t_coarse0: 0,
             t_coarse1: 0,
             t_coarse2: 0,
@@ -175,7 +176,7 @@ impl Time {
             let nsec = (cuc_time_fine as f64) * CUCFINE2_TO_NSEC;
             timespec_nsec = nsec as i32;
         } else if (self.p_field == L1_TIME_4_1) || (self.p_field == L2_TIME_4_1) {
-            let cuc_time_fine = (self.t_fine1 as u64) * 0x000100_u64;
+            let cuc_time_fine = (self.t_fine0 as u64) * 0x000001_u64;
             let nsec = (cuc_time_fine as f64) * CUCFINE1_TO_NSEC;
             timespec_nsec = nsec as i32;
         } else if (self.p_field != L1_TIME_4_0) && (self.p_field != L2_TIME_4_0) {

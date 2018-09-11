@@ -12,6 +12,7 @@
 //*****************************************************************************
 // Assert helpers for unit tests                                              *
 //*****************************************************************************
+use time;
 
 pub fn dump_u8(val_name: &str, val: u8, expected: u8) {
     println!("{} = {}", val_name, val);
@@ -41,4 +42,14 @@ pub fn dump_usize(val_name: &str, val: usize, expected: usize) {
 pub fn dump_string(val_name: &str, val: &str, expected: &str) {
     println!("{} = {}", val_name, val);
     assert_eq!(val, expected);
+}
+
+pub fn dump_timespec(
+    val_name: &str,
+    val: time::Timespec,
+    expected_sec: i64,
+    expected_nsec: i32) {
+    println!("{} = {},{}", val_name, val.sec, val.nsec);
+    assert_eq!(val.sec, expected_sec);
+    assert_eq!(val.nsec, expected_nsec);
 }

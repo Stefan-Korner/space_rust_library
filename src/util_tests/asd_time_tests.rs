@@ -20,16 +20,6 @@ use util::asd_time;
 // functions //
 ///////////////
 
-fn assert_dump_timespec(
-    val_name: &str, 
-    val: time::Timespec,
-    expected_sec: i64,
-    expected_nsec: i32) {
-    println!("{} = {},{}", val_name, val.sec, val.nsec);
-    assert_eq!(val.sec, expected_sec);
-    assert_eq!(val.nsec, expected_nsec);
-}
-
 fn print_time(title: &str, prefix: &str, timespec: time::Timespec) {
     println!("----- {} -----", title);
     println!("{}: timespec.sec = {}", prefix, timespec.sec);
@@ -77,7 +67,7 @@ fn test_parse_error(time_str: &str) {
 
 fn test_parse_ok(time_str: &str, expected_sec: i64, expected_nsec: i32) {
     let time = asd_time::parse_time(time_str).unwrap();
-    assert_dump_timespec(time_str, time, expected_sec, expected_nsec);
+    assert::dump_timespec(time_str, time, expected_sec, expected_nsec);
 }
 
 pub fn test() {
