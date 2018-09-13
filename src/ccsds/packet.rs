@@ -137,43 +137,42 @@ pub trait PacketIntf: du::DUintf {
     /////////////////////
 
     // CUC time  access
-    fn get_cuc_time(&self, _byte_pos: usize, _p_field: u8) ->
+    fn get_cuc_time(&self, byte_pos: usize, p_field: u8) ->
         Result<cuc_time::Time, exception::Exception> {
-/*
         // consistency checks
-        if byte_length == 0 {
-            return Err(exception::raise("invalid byte_length"));
-        }
-        let end_pos = byte_pos + byte_length;
-        if end_pos > self.size() {
-            return Err(exception::raise("byte_pos/byte_length out of buffer"));
-        }
-        Ok(&self.buffer_read_only()[byte_pos..end_pos])
-*/
-panic!();
+        let data_size = match cuc_time::get_full_data_size(p_field) {
+            Err(err) => return Err(err),
+            Ok(data_size) => data_size,
+        };
+        if (byte_pos + data_size) > self.size() {
+            return Err(exception::raise("byte_pos/data_size out of buffer"));
+        };
+        if cuc_time::has_p_field(p_field) &&
+           (p_field != self.buffer_read_only()[byte_pos]) {
+            return Err(exception::raise("unexpected p-field in buffer"));
+        };
+        // create the correct variant of cuc_time
+        let mut cuc_time = match cuc_time::Time::new_from_p_field(p_field) {
+            Err(err) => return Err(err),
+            Ok(cuc_time) => cuc_time,
+        };
+        // copy the exact amount of bytes from cuc_time into self
+        cuc_time.init_from_bytes(&self.buffer_read_only()[byte_pos..]);
+        Ok(cuc_time)
     }
-    fn set_cuc_time(&mut self, _byte_pos: usize, _p_field: u8, _cuc_time: cuc_time::Time) ->
+    fn set_cuc_time(&mut self, byte_pos: usize, p_field: u8, cuc_time: cuc_time::Time) ->
         Result<(), exception::Exception> {
-/*
         // consistency checks
-        if byte_length == 0 {
-            return Err(exception::raise("invalid byte_length"));
-        }
-        if (byte_pos + byte_length) > self.size() {
-            return Err(exception::raise("byte_pos/byte_length out of buffer"));
-        }
-        // copy the minimum of bytes defined by byte_length and bytes
-        let num_bytes = cmp::min(byte_length, bytes.len());
-        let mut src_byte_pos = 0;
-        let mut dest_byte_pos = byte_pos;
-        while src_byte_pos < num_bytes {
-            self.buffer_read_write()[dest_byte_pos] = bytes[src_byte_pos];
-            src_byte_pos += 1;
-            dest_byte_pos += 1;
-        }
+        let data_size = match cuc_time::get_full_data_size(p_field) {
+            Err(err) => return Err(err),
+            Ok(data_size) => data_size,
+        };
+        if (byte_pos + data_size) > self.size() {
+            return Err(exception::raise("byte_pos/data_size out of buffer"));
+        };
+        // copy the exact amount of bytes from cuc_time into self
+        cuc_time.update_to_bytes(&mut self.buffer_read_write()[byte_pos..]);
         Ok(())
-*/
-panic!();
     }
     fn get_cuc_time_acc(&self, acc: CucTimeAccessor) ->
         Result<cuc_time::Time, exception::Exception> {

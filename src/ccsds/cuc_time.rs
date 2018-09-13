@@ -380,6 +380,29 @@ pub fn get_data_size(p_field: u8) ->
         _ => Err(exception::raise("invalid p-field for CUC time")),
     }
 }
+// brutto data size with embedded p-field (if embedded p-field)
+pub fn get_full_data_size(p_field: u8) ->
+    Result<usize, exception::Exception> {
+    match p_field {
+        L1_TIME_4_0 => Ok(5),
+        L1_TIME_4_1 => Ok(6),
+        L1_TIME_4_2 => Ok(7),
+        L1_TIME_4_3 => Ok(8),
+        L2_TIME_4_0 => Ok(5),
+        L2_TIME_4_1 => Ok(6),
+        L2_TIME_4_2 => Ok(7),
+        L2_TIME_4_3 => Ok(8),
+        T1_TIME_4_0 => Ok(4),
+        T1_TIME_4_1 => Ok(5),
+        T1_TIME_4_2 => Ok(6),
+        T1_TIME_4_3 => Ok(7),
+        T2_TIME_4_0 => Ok(4),
+        T2_TIME_4_1 => Ok(5),
+        T2_TIME_4_2 => Ok(6),
+        T2_TIME_4_3 => Ok(7),
+        _ => Err(exception::raise("invalid p-field for CUC time")),
+    }
+}
 
 
 
