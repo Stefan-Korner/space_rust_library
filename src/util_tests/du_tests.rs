@@ -37,7 +37,7 @@ def_bit_accessor!(BIT_ACC4, 20, 16);
 
 def_byte_accessor!(BYTE_ACC1, 5, 4);
 
-fn assert_dump_du(val_name: &str, val: &du::DU, expected: &str) {
+pub fn assert_dump_du(val_name: &str, val: &du::DU, expected: &str) {
     println!("{} = {}", val_name, val.dump_str());
     assert_eq!(val.dump_str(), expected);
 }

@@ -20,7 +20,7 @@ use time;
 // functions //
 ///////////////
 
-fn assert_dump_cuc_time(
+pub fn assert_dump_cuc_time(
     val_name: &str,
     val: cuc_time::Time,
     expected: cuc_time::Time) {

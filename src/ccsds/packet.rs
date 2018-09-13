@@ -51,6 +51,7 @@ pub mod primary_header {
 // accessors for different types //
 ///////////////////////////////////
 
+#[derive(Copy, Clone, Debug)]
 pub struct CucTimeAccessor {
     pub byte_pos: usize,
     pub p_field: u8

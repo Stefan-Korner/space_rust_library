@@ -36,6 +36,7 @@ const BIT_FILTER: [[u8; 8]; 8] = [
 // accessors for different types //
 ///////////////////////////////////
 
+#[derive(Copy, Clone, Debug)]
 pub struct BitAccessor {
     pub bit_pos: usize,
     pub bit_length: usize
@@ -47,6 +48,7 @@ macro_rules! def_bit_accessor {
     };
 }
 
+#[derive(Copy, Clone, Debug)]
 pub struct ByteAccessor {
     pub byte_pos: usize,
     pub byte_length: usize
@@ -58,6 +60,7 @@ macro_rules! def_byte_accessor {
     };
 }
 
+#[derive(Copy, Clone, Debug)]
 pub struct UnsignedAccessor {
     pub byte_pos: usize,
     pub byte_length: usize
@@ -69,6 +72,7 @@ macro_rules! def_unsigned_accessor {
     };
 }
 
+#[derive(Copy, Clone, Debug)]
 pub struct BigUnsignedAccessor {
     pub byte_pos: usize,
     pub byte_length: usize
