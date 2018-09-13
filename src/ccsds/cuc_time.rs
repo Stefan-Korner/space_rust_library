@@ -112,10 +112,17 @@ impl CoarseTime {
     }
     // initialization from bytes
     pub fn init_from_bytes(&mut self, bytes: &[u8]) {
-        self.t_coarse3 = bytes[0];
-        self.t_coarse2 = bytes[1];
-        self.t_coarse1 = bytes[2];
-        self.t_coarse0 = bytes[3];
+        self.t_coarse0 = bytes[0];
+        self.t_coarse1 = bytes[1];
+        self.t_coarse2 = bytes[2];
+        self.t_coarse3 = bytes[3];
+    }
+    // update the contents to bytes
+    pub fn update_to_bytes(&self, bytes: &mut [u8]) {
+        bytes[0] = self.t_coarse0;
+        bytes[1] = self.t_coarse1;
+        bytes[2] = self.t_coarse2;
+        bytes[3] = self.t_coarse3;
     }
     // dumps the contents to a string
     pub fn dump_str(&self) -> String {
@@ -149,6 +156,9 @@ impl FineTime0 {
     pub fn to_nsec(&self) -> i32 {0}
     // initialization from bytes
     pub fn init_from_bytes(&mut self, _bytes: &[u8]) {}
+    // update the contents to bytes
+    pub fn update_to_bytes(&self, _bytes: &mut [u8]) {
+    }
     // dumps the contents to a string
     pub fn dump_str(&self) -> String {
         format!("()")
@@ -193,6 +203,10 @@ impl FineTime1 {
     // initialization from bytes
     pub fn init_from_bytes(&mut self, bytes: &[u8]) {
         self.t_fine0 = bytes[0];
+    }
+    // update the contents to bytes
+    pub fn update_to_bytes(&self, bytes: &mut [u8]) {
+        bytes[0] = self.t_fine0;
     }
     // dumps the contents to a string
     pub fn dump_str(&self) -> String {
@@ -244,8 +258,13 @@ impl FineTime2 {
     }
     // initialization from bytes
     pub fn init_from_bytes(&mut self, bytes: &[u8]) {
-        self.t_fine1 = bytes[0];
-        self.t_fine0 = bytes[1];
+        self.t_fine0 = bytes[0];
+        self.t_fine1 = bytes[1];
+    }
+    // update the contents to bytes
+    pub fn update_to_bytes(&self, bytes: &mut [u8]) {
+        bytes[0] = self.t_fine0;
+        bytes[1] = self.t_fine1;
     }
     // dumps the contents to a string
     pub fn dump_str(&self) -> String {
@@ -304,15 +323,65 @@ impl FineTime3 {
     }
     // initialization from bytes
     pub fn init_from_bytes(&mut self, bytes: &[u8]) {
-        self.t_fine2 = bytes[0];
+        self.t_fine0 = bytes[0];
         self.t_fine1 = bytes[1];
-        self.t_fine0 = bytes[2];
+        self.t_fine2 = bytes[2];
+    }
+    // update the contents to bytes
+    pub fn update_to_bytes(&self, bytes: &mut [u8]) {
+        bytes[0] = self.t_fine0;
+        bytes[1] = self.t_fine1;
+        bytes[2] = self.t_fine2;
     }
     // dumps the contents to a string
     pub fn dump_str(&self) -> String {
         format!("({},{},{})", self.t_fine0, self.t_fine1, self.t_fine2)
     }
 }
+
+//////////////////////
+// helper functions //
+//////////////////////
+
+// tells if a time format has an explicit p-field
+pub fn has_p_field(p_field: u8) -> bool {
+    match p_field {
+        L1_TIME_4_0 |
+        L1_TIME_4_1 |
+        L1_TIME_4_2 |
+        L1_TIME_4_3 |
+        L2_TIME_4_0 |
+        L2_TIME_4_1 |
+        L2_TIME_4_2 |
+        L2_TIME_4_3 => true,
+        _ => false,
+    }
+}
+// netto data size without embedded p-field
+pub fn get_data_size(p_field: u8) ->
+    Result<usize, exception::Exception> {
+    match p_field {
+        L1_TIME_4_0 => Ok(4),
+        L1_TIME_4_1 => Ok(5),
+        L1_TIME_4_2 => Ok(6),
+        L1_TIME_4_3 => Ok(7),
+        L2_TIME_4_0 => Ok(4),
+        L2_TIME_4_1 => Ok(5),
+        L2_TIME_4_2 => Ok(6),
+        L2_TIME_4_3 => Ok(7),
+        T1_TIME_4_0 => Ok(4),
+        T1_TIME_4_1 => Ok(5),
+        T1_TIME_4_2 => Ok(6),
+        T1_TIME_4_3 => Ok(7),
+        T2_TIME_4_0 => Ok(4),
+        T2_TIME_4_1 => Ok(5),
+        T2_TIME_4_2 => Ok(6),
+        T2_TIME_4_3 => Ok(7),
+        _ => Err(exception::raise("invalid p-field for CUC time")),
+    }
+}
+
+
 
 /////////////////////
 // enum definition //
@@ -781,7 +850,7 @@ impl Time {
             T2_TIME_4_1 => Ok(Time::new_t2_time_4_1()),
             T2_TIME_4_2 => Ok(Time::new_t2_time_4_2()),
             T2_TIME_4_3 => Ok(Time::new_t2_time_4_3()),
-            _ => Err(exception::raise("invalid P field for CUC time creation")),
+            _ => Err(exception::raise("invalid p-field for CUC time creation")),
         }
     }
     // initialization from p_field and timespec
@@ -905,40 +974,41 @@ impl Time {
         };
         time::Timespec::new(sec, nsec)
     }
-    // initialization from timespec
+    // initialization from bytes, skips p-field (if embedded p-field)
     pub fn init_from_bytes(&mut self, bytes: &[u8]) {
         match self {
             Time::L1Time40 {coarse_time, fine_time} => {
-                coarse_time.init_from_bytes(&bytes);
-                fine_time.init_from_bytes(&bytes[4..]);
+                coarse_time.init_from_bytes(&bytes[1..]);
+                fine_time.init_from_bytes(&bytes[5..]);
             },
             Time::L1Time41 {coarse_time, fine_time} => {
-                coarse_time.init_from_bytes(&bytes);
-                fine_time.init_from_bytes(&bytes[4..]);
+                coarse_time.init_from_bytes(&bytes[1..]);
+                fine_time.init_from_bytes(&bytes[5..]);
             },
             Time::L1Time42 {coarse_time, fine_time} => {
-                coarse_time.init_from_bytes(&bytes);
-                fine_time.init_from_bytes(&bytes[4..]);
+                coarse_time.init_from_bytes(&bytes[1..]);
+                fine_time.init_from_bytes(&bytes[5..]);
+
             },
             Time::L1Time43 {coarse_time, fine_time} => {
-                coarse_time.init_from_bytes(&bytes);
-                fine_time.init_from_bytes(&bytes[4..]);
+                coarse_time.init_from_bytes(&bytes[1..]);
+                fine_time.init_from_bytes(&bytes[5..]);
             },
             Time::L2Time40 {coarse_time, fine_time} => {
-                coarse_time.init_from_bytes(&bytes);
-                fine_time.init_from_bytes(&bytes[4..]);
+                coarse_time.init_from_bytes(&bytes[1..]);
+                fine_time.init_from_bytes(&bytes[5..]);
             },
             Time::L2Time41 {coarse_time, fine_time} => {
-                coarse_time.init_from_bytes(&bytes);
-                fine_time.init_from_bytes(&bytes[4..]);
+                coarse_time.init_from_bytes(&bytes[1..]);
+                fine_time.init_from_bytes(&bytes[5..]);
             },
             Time::L2Time42 {coarse_time, fine_time} => {
-                coarse_time.init_from_bytes(&bytes);
-                fine_time.init_from_bytes(&bytes[4..]);
+                coarse_time.init_from_bytes(&bytes[1..]);
+                fine_time.init_from_bytes(&bytes[5..]);
             },
             Time::L2Time43 {coarse_time, fine_time} => {
-                coarse_time.init_from_bytes(&bytes);
-                fine_time.init_from_bytes(&bytes[4..]);
+                coarse_time.init_from_bytes(&bytes[1..]);
+                fine_time.init_from_bytes(&bytes[5..]);
             },
             Time::T1Time40 {coarse_time, fine_time} => {
                 coarse_time.init_from_bytes(&bytes);
@@ -971,6 +1041,83 @@ impl Time {
             Time::T2Time43 {coarse_time, fine_time} => {
                 coarse_time.init_from_bytes(&bytes);
                 fine_time.init_from_bytes(&bytes[4..]);
+            },
+        };
+    }
+    // update the contents to bytes incl. p-field (if embedded p-field)
+    pub fn update_to_bytes(&self, bytes: &mut [u8]) {
+        match self {
+            Time::L1Time40 {coarse_time, fine_time} => {
+                bytes[0] = L1_TIME_4_0;
+                coarse_time.update_to_bytes(&mut bytes[1..]);
+                fine_time.update_to_bytes(&mut bytes[5..]);
+            },
+            Time::L1Time41 {coarse_time, fine_time} => {
+                bytes[0] = L1_TIME_4_1;
+                coarse_time.update_to_bytes(&mut bytes[1..]);
+                fine_time.update_to_bytes(&mut bytes[5..]);
+            },
+            Time::L1Time42 {coarse_time, fine_time} => {
+                bytes[0] = L1_TIME_4_2;
+                coarse_time.update_to_bytes(&mut bytes[1..]);
+                fine_time.update_to_bytes(&mut bytes[5..]);
+            },
+            Time::L1Time43 {coarse_time, fine_time} => {
+                bytes[0] = L1_TIME_4_3;
+                coarse_time.update_to_bytes(&mut bytes[1..]);
+                fine_time.update_to_bytes(&mut bytes[5..]);
+            },
+            Time::L2Time40 {coarse_time, fine_time} => {
+                bytes[0] = L2_TIME_4_0;
+                coarse_time.update_to_bytes(&mut bytes[1..]);
+                fine_time.update_to_bytes(&mut bytes[5..]);
+            },
+            Time::L2Time41 {coarse_time, fine_time} => {
+                bytes[0] = L2_TIME_4_1;
+                coarse_time.update_to_bytes(&mut bytes[1..]);
+                fine_time.update_to_bytes(&mut bytes[5..]);
+            },
+            Time::L2Time42 {coarse_time, fine_time} => {
+                bytes[0] = L2_TIME_4_2;
+                coarse_time.update_to_bytes(&mut bytes[1..]);
+                fine_time.update_to_bytes(&mut bytes[5..]);
+            },
+            Time::L2Time43 {coarse_time, fine_time} => {
+                bytes[0] = L2_TIME_4_3;
+                coarse_time.update_to_bytes(&mut bytes[1..]);
+                fine_time.update_to_bytes(&mut bytes[5..]);
+            },
+            Time::T1Time40 {coarse_time, fine_time} => {
+                coarse_time.update_to_bytes(bytes);
+                fine_time.update_to_bytes(&mut bytes[4..]);
+            },
+            Time::T1Time41 {coarse_time, fine_time} => {
+                coarse_time.update_to_bytes(bytes);
+                fine_time.update_to_bytes(&mut bytes[4..]);
+            },
+            Time::T1Time42 {coarse_time, fine_time} => {
+                coarse_time.update_to_bytes(bytes);
+                fine_time.update_to_bytes(&mut bytes[4..]);
+            },
+            Time::T1Time43 {coarse_time, fine_time} => {
+                coarse_time.update_to_bytes(bytes);
+                fine_time.update_to_bytes(&mut bytes[4..]);
+            },
+            Time::T2Time40 {coarse_time, fine_time} => {
+                coarse_time.update_to_bytes(bytes);
+                fine_time.update_to_bytes(&mut bytes[4..]);
+            },
+            Time::T2Time41 {coarse_time, fine_time} => {
+                coarse_time.update_to_bytes(bytes);
+                fine_time.update_to_bytes(&mut bytes[4..]);
+            },
+            Time::T2Time42 {coarse_time, fine_time} => {
+                coarse_time.update_to_bytes(bytes);
+                fine_time.update_to_bytes(&mut bytes[4..]);
+            },
+            Time::T2Time43 {coarse_time, fine_time} => {
+                coarse_time.update_to_bytes(bytes);
+                fine_time.update_to_bytes(&mut bytes[4..]);
             },
         };
     }
