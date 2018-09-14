@@ -34,6 +34,7 @@ def_bit_accessor!(BIT_ACC1,  4,  1);
 def_bit_accessor!(BIT_ACC2,  5,  3);
 def_bit_accessor!(BIT_ACC3, 12,  8);
 def_bit_accessor!(BIT_ACC4, 20, 16);
+def_bit_accessor!(BIT_ACC5, 20, 32);
 
 def_byte_accessor!(BYTE_ACC1, 5, 4);
 
@@ -326,6 +327,8 @@ pub fn test() {
     assert::dump_u32("val", val, 48);
     val = du9.get_bits_acc(BIT_ACC4).unwrap();
     assert::dump_u32("val", val, 8211);
+    val = du9.get_bits_acc(BIT_ACC5).unwrap();
+    assert::dump_u32("val", val, 538133331);
 
     du9.set_bits_acc(BIT_ACC1, 1).unwrap();
     assert_dump_du("du9", &du9, "
@@ -351,18 +354,24 @@ pub fn test() {
 0010 69 20 68 75 68 75 68 75 00 00 00 00 00 00 00 00 i huhuhu........
 0020 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................
 0030 00 00 00 00 00 00 00 00                         ........");
+    du9.set_bits_acc(BIT_ACC5, 305419896).unwrap();
+    assert_dump_du("du9", &du9, "
+0000 0b 0a b1 23 45 67 86 37 38 39 20 68 69 68 69 68 ...#Eg.789 hihih
+0010 69 20 68 75 68 75 68 75 00 00 00 00 00 00 00 00 i huhuhu........
+0020 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................
+0030 00 00 00 00 00 00 00 00                         ........");
 
     // sub-scope to avoid life cycle conflict (read-only + read-write)
     {
         let bytes = du9.get_bytes_acc(BYTE_ACC1).unwrap();
         let du8 = du::DU::new_read_only(&bytes);
         assert_dump_du("du8", &du8, "
-0000 35 36 37 38                                     5678");
+0000 67 86 37 38                                     g.78");
     }
 
     du9.set_bytes_acc(BYTE_ACC1, "ABCD".as_bytes()).unwrap();
     assert_dump_du("du9", &du9, "
-0000 0b 0a b9 87 64 41 42 43 44 39 20 68 69 68 69 68 ....dABCD9 hihih
+0000 0b 0a b1 23 45 41 42 43 44 39 20 68 69 68 69 68 ...#EABCD9 hihih
 0010 69 20 68 75 68 75 68 75 00 00 00 00 00 00 00 00 i huhuhu........
 0020 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................
 0030 00 00 00 00 00 00 00 00                         ........");

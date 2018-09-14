@@ -194,20 +194,20 @@ pub trait DUintf {
         let mut byte_pos = bit_pos >> 3;
         let byte = self.buffer_read_only()[byte_pos];
         // first byte: filter the highest bits that do not belong to the value
-        let first_bit_in_byte_pos = bit_pos & 7;
-        let bit_filter = (1_u8 << (8 - first_bit_in_byte_pos)) - 1;
-        let mut value = (byte & bit_filter) as u32;
+        let first_bit_in_byte_pos = (bit_pos & 7) as u64;
+        let bit_filter = (1 << (8 - first_bit_in_byte_pos)) - 1;
+        let mut value = (byte as u64) & bit_filter;
         // next bytes...
         byte_pos += 1;
         while byte_pos <= last_byte_pos {
             let byte = self.buffer_read_only()[byte_pos];
-            value = (value << 8) + (byte as u32);
+            value = (value << 8) + (byte as u64);
             byte_pos += 1;
         }
         // last byte: remove the lowest bits that do not belong to the value
-        let last_bit_in_byte_pos = last_bit_pos & 7;
+        let last_bit_in_byte_pos = (last_bit_pos & 7) as u64;
         value >>= 7 - last_bit_in_byte_pos;
-        Ok(value)
+        Ok(value as u32)
     }
     fn set_bits(&mut self, bit_pos: usize, bit_length: usize, value: u32) ->
         Result<(), exception::Exception> {
