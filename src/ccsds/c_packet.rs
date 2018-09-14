@@ -59,7 +59,7 @@ pub struct CucTimeAccessor {
 #[macro_export]
 macro_rules! def_cuc_time_accessor {
     ($acc_name: ident, $byte_pos: expr, $p_field: expr) => {
-        pub const $acc_name: packet::CucTimeAccessor = packet::CucTimeAccessor {byte_pos: $byte_pos, p_field: $p_field};
+        pub const $acc_name: c_packet::CucTimeAccessor = c_packet::CucTimeAccessor {byte_pos: $byte_pos, p_field: $p_field};
     };
 }
 

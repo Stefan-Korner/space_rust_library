@@ -56,12 +56,12 @@ mod tests {
     }
 
     #[test]
-    fn test_ccsds_cuc_time() {
-        ::ccsds_tests::cuc_time_tests::test();
+    fn test_ccsds_c_packet() {
+        ::ccsds_tests::c_packet_tests::test();
     }
 
     #[test]
-    fn test_ccsds_packet() {
-        ::ccsds_tests::packet_tests::test();
+    fn test_ccsds_cuc_time() {
+        ::ccsds_tests::cuc_time_tests::test();
     }
 }

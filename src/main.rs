@@ -21,6 +21,6 @@ fn main() {
     space_rust_library::util_tests::du_tests::test();
     space_rust_library::util_tests::exception_tests::test();
     space_rust_library::util_tests::tco_tests::test();
+    space_rust_library::ccsds_tests::c_packet_tests::test();
     space_rust_library::ccsds_tests::cuc_time_tests::test();
-    space_rust_library::ccsds_tests::packet_tests::test();
 }

@@ -13,8 +13,8 @@
 // CCSDS Stack - CCSDS Packet Module - Unit tests                             *
 //*****************************************************************************
 use ccsds::cuc_time;
-use ccsds::packet;
-use ccsds::packet::PacketIntf;
+use ccsds::c_packet;
+use ccsds::c_packet::PacketIntf;
 use ccsds_tests::cuc_time_tests;
 use util::du::DUintf;
 
@@ -40,42 +40,42 @@ def_cuc_time_accessor!(CUC_TIME_ACC_ERR2, 25, cuc_time::L2_TIME_4_3);
 def_cuc_time_accessor!(CUC_TIME_ACC_ERR3, 26, cuc_time::T2_TIME_4_3);
 def_cuc_time_accessor!(CUC_TIME_ACC_ERR4, 16, cuc_time::L2_TIME_4_3);
 
-pub fn assert_dump_packet(val_name: &str, val: &packet::Packet, expected: &str) {
+pub fn assert_dump_packet(val_name: &str, val: &c_packet::Packet, expected: &str) {
     println!("{} = {}", val_name, val.dump_str());
     assert_eq!(val.dump_str(), expected);
 }
 
-pub fn assert_dump_tm_packet(val_name: &str, val: &packet::TMpacket, expected: &str) {
+pub fn assert_dump_tm_packet(val_name: &str, val: &c_packet::TMpacket, expected: &str) {
     println!("{} = {}", val_name, val.dump_str());
     assert_eq!(val.dump_str(), expected);
 }
 
-pub fn assert_dump_tc_packet(val_name: &str, val: &packet::TCpacket, expected: &str) {
+pub fn assert_dump_tc_packet(val_name: &str, val: &c_packet::TCpacket, expected: &str) {
     println!("{} = {}", val_name, val.dump_str());
     assert_eq!(val.dump_str(), expected);
 }
 
 fn test_cuc_time_set_error(
-    acc: packet::CucTimeAccessor,
+    acc: c_packet::CucTimeAccessor,
     cuc_time: cuc_time::Time) {
-    let mut packet = packet::Packet::new_alloc(32);
+    let mut packet = c_packet::Packet::new_alloc(32);
     let error_message = packet.set_cuc_time_acc(acc, cuc_time).
         expect_err("expected error did not happen");
     println!("expected: {} for {}", error_message, cuc_time);
 }
 
-fn test_cuc_time_get_error(acc: packet::CucTimeAccessor) {
-    let packet = packet::Packet::new_alloc(32);
+fn test_cuc_time_get_error(acc: c_packet::CucTimeAccessor) {
+    let packet = c_packet::Packet::new_alloc(32);
     let error_message = packet.get_cuc_time_acc(acc).
         expect_err("expected error did not happen");
     println!("expected: {}", error_message);
 }
 
 fn test_cuc_time_set_get_ok(
-    acc: packet::CucTimeAccessor,
+    acc: c_packet::CucTimeAccessor,
     cuc_time: cuc_time::Time,
     expected_packet_str: &str) {
-    let mut packet = packet::Packet::new_alloc(32);
+    let mut packet = c_packet::Packet::new_alloc(32);
     packet.set_cuc_time_acc(acc, cuc_time).unwrap();
     assert_dump_packet("packet", &packet, expected_packet_str);
     let cuc_time2 = packet.get_cuc_time_acc(acc).unwrap();
@@ -84,17 +84,17 @@ fn test_cuc_time_set_get_ok(
 
 pub fn test() {
     // some basic packet tests
-    let packet = packet::Packet::new();
+    let packet = c_packet::Packet::new();
     assert_dump_packet("packet", &packet, "
 0000 00 00 00 00 00 00 00                            .......");
-    let tm_packet = packet::TMpacket::new();
+    let tm_packet = c_packet::TMpacket::new();
     assert_dump_tm_packet("tm_packet", &tm_packet, "
 0000 00 00 00 00 00 00 00                            .......");
-    let tc_packet = packet::TCpacket::new();
+    let tc_packet = c_packet::TCpacket::new();
     assert_dump_tc_packet("tc_packet", &tc_packet, "
 0000 00 00 00 00 00 00 00                            .......");
     // test access of CUC time
-    let mut packet = packet::Packet::new_alloc(32);
+    let mut packet = c_packet::Packet::new_alloc(32);
     assert_dump_packet("packet", &packet, "
 0000 00 00 00 00 00 19 00 00 00 00 00 00 00 00 00 00 ................
 0010 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ................");
