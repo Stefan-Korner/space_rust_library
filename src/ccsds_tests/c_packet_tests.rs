@@ -16,6 +16,7 @@ use ccsds::cuc_time;
 use ccsds::c_packet;
 use ccsds::c_packet::PacketIntf;
 use ccsds_tests::cuc_time_tests;
+use util::du;
 use util::du::DUintf;
 
 def_cuc_time_accessor!(CUC_TIME_ACC1, 16, cuc_time::L2_TIME_4_3);
@@ -39,6 +40,12 @@ def_cuc_time_accessor!(CUC_TIME_ACC_ERR1, 16, 0);
 def_cuc_time_accessor!(CUC_TIME_ACC_ERR2, 25, cuc_time::L2_TIME_4_3);
 def_cuc_time_accessor!(CUC_TIME_ACC_ERR3, 26, cuc_time::T2_TIME_4_3);
 def_cuc_time_accessor!(CUC_TIME_ACC_ERR4, 16, cuc_time::L2_TIME_4_3);
+
+// some accessors from util::du to check compile cleaness
+def_unsigned_accessor!(UINT_ACC, 0, 0);
+def_big_unsigned_accessor!(BUINT_ACC, 0, 0);
+def_bit_accessor!(BIT_ACC,  0,  0);
+def_byte_accessor!(BYTE_ACC, 0, 0);
 
 pub fn assert_dump_packet(val_name: &str, val: &c_packet::Packet, expected: &str) {
     println!("{} = {}", val_name, val.dump_str());

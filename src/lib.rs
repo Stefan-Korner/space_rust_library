@@ -22,6 +22,8 @@ pub mod util_tests;
 #[macro_use]
 pub mod ccsds;
 pub mod ccsds_tests;
+pub mod pus;
+pub mod pus_tests;
 
 #[cfg(test)]
 mod tests {
@@ -63,5 +65,10 @@ mod tests {
     #[test]
     fn test_ccsds_cuc_time() {
         ::ccsds_tests::cuc_time_tests::test();
+    }
+
+    #[test]
+    fn test_pus_p_packet() {
+        ::pus_tests::p_packet_tests::test();
     }
 }

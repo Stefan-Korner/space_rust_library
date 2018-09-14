@@ -10,18 +10,18 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the MIT License   *
 // for more details.                                                          *
 //*****************************************************************************
-// Executable configuration                                                   *
+// PUS Packet Utilization Standard - PUS Packet Module - Unit tests           *
 //*****************************************************************************
-extern crate space_rust_library;
 
-fn main() {
-    space_rust_library::util_tests::asd_time_tests::test();
-    space_rust_library::util_tests::config_tests::test();
-    space_rust_library::util_tests::crc_tests::test();
-    space_rust_library::util_tests::du_tests::test();
-    space_rust_library::util_tests::exception_tests::test();
-    space_rust_library::util_tests::tco_tests::test();
-    space_rust_library::ccsds_tests::c_packet_tests::test();
-    space_rust_library::ccsds_tests::cuc_time_tests::test();
-    space_rust_library::pus_tests::p_packet_tests::test();
+use ccsds::c_packet;
+use util::du;
+
+// some accessors from util::du and ccsds::c_packet to check compile cleaness
+def_unsigned_accessor!(UINT_ACC, 0, 0);
+def_big_unsigned_accessor!(BUINT_ACC, 0, 0);
+def_bit_accessor!(BIT_ACC,  0,  0);
+def_byte_accessor!(BYTE_ACC, 0, 0);
+def_cuc_time_accessor!(CUC_TIME_ACC, 0, 0);
+
+pub fn test() {
 }
